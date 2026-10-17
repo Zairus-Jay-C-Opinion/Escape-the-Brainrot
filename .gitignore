@@ -1,0 +1,7 @@
+bin/
+out/
+*.class
+.idea/
+.DS_Store
+.vscode/*
+!.vscode/settings.json
