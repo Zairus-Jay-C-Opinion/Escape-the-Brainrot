@@ -9,6 +9,7 @@ A Java 2D retro horror adventure game for an OOP 101 final project, built by a t
 - Load resources with getResourceAsStream from the res/ folder.
 - Must demonstrate encapsulation, inheritance, polymorphism, abstraction, exception handling, and arrays/collections naturally, never forced.
 - The project folder name may contain spaces. Always quote paths in scripts.
+- Never add Co-Authored-By lines or any AI attribution to commits or pull requests.
 
 ## Architecture (do not change without asking)
 - Packages: engine, world, entity, battle, challenge, systems, exception, ui.
