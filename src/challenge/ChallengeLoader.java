@@ -1,99 +1,187 @@
 package challenge;
 
+import battle.Difficulty;
 import engine.AssetManager;
 import exception.AssetLoadException;
 import exception.InvalidChallengeException;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reads challenges from a text file in res/challenges/. Owner: Andrew (written by Zrs as the working example).
- * The file format is provisional; see the comment at the top of sample.txt.
+ * Loads all Challenge types from res/challenges/ using getResourceAsStream or AssetManager.open.
+ * Owner: Andrew.
  */
 public final class ChallengeLoader {
 
     private ChallengeLoader() { }
 
-    /** Loads every question in the file, e.g. load("/challenges/sample.txt"). */
+    /** Legacy alias: returns challenges or empty list on exception. */
     public static List<Challenge> load(String resourcePath) throws AssetLoadException, InvalidChallengeException {
-        List<Challenge> challenges = new ArrayList<>();
-        List<String> block = new ArrayList<>(); // lines of the question being read
+        return loadChallenges(resourcePath);
+    }
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(AssetManager.open(resourcePath), StandardCharsets.UTF_8))) {
+    /** Loads all challenges from the given resource path. */
+    public static List<Challenge> loadChallenges(String resourcePath) {
+        List<Challenge> challenges = new ArrayList<>();
+        String normalizedPath = resourcePath.startsWith("/") ? resourcePath : "/" + resourcePath;
+
+        InputStream is = null;
+        try {
+            is = AssetManager.open(normalizedPath);
+        } catch (Exception e) {
+            is = ChallengeLoader.class.getResourceAsStream(normalizedPath);
+        }
+
+        if (is == null) {
+            System.err.println("Warning: Resource not found: " + resourcePath);
+            return challenges;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            List<String> block = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.trim().equals("---")) {
-                    addIfNotEmpty(challenges, block);
-                    block = new ArrayList<>();
+                    parseBlock(challenges, block);
+                    block.clear();
                 } else {
                     block.add(line);
                 }
             }
-            addIfNotEmpty(challenges, block); // the last question has no --- after it
-        } catch (IOException e) {
-            throw new AssetLoadException("Could not read " + resourcePath, e);
+            if (!block.isEmpty()) {
+                parseBlock(challenges, block);
+            }
+        } catch (Exception e) {
+            System.err.println("Error reading challenges from " + resourcePath + ": " + e.getMessage());
         }
+
         return challenges;
     }
 
-    private static void addIfNotEmpty(List<Challenge> challenges, List<String> block)
-            throws InvalidChallengeException {
-        boolean hasContent = block.stream().anyMatch(l -> !l.isBlank() && !l.trim().startsWith("#"));
-        if (hasContent) {
-            challenges.add(buildChallenge(block, challenges.size() + 1));
+    private static void parseBlock(List<Challenge> challenges, List<String> block) {
+        if (block.isEmpty() || block.stream().allMatch(l -> l.isBlank() || l.trim().startsWith("#"))) {
+            return;
+        }
+
+        // Check if block uses legacy format (starts with TYPE= or CHOICE=)
+        boolean isLegacy = block.stream().anyMatch(l -> {
+            String t = l.trim().toUpperCase();
+            return t.startsWith("TYPE=") || t.startsWith("CHOICE=");
+        });
+
+        if (isLegacy) {
+            Challenge c = parseLegacyBlock(block);
+            if (c != null) {
+                challenges.add(c);
+            }
+            return;
+        }
+
+        // Parse modern sectioned format (ID:, TYPE:, DIFFICULTY:, etc.)
+        String id = "";
+        String type = "";
+        Difficulty diff = Difficulty.EASY;
+        StringBuilder prompt = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+        String answer = "";
+        String explanation = "";
+        String currentSection = "";
+
+        for (String line : block) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                continue;
+            }
+
+            if (trimmed.startsWith("ID:")) {
+                id = trimmed.substring(3).trim();
+                currentSection = "";
+            } else if (trimmed.startsWith("TYPE:")) {
+                type = trimmed.substring(5).trim();
+                currentSection = "";
+            } else if (trimmed.startsWith("DIFFICULTY:")) {
+                try {
+                    diff = Difficulty.valueOf(trimmed.substring(11).trim().toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    diff = Difficulty.EASY;
+                }
+                currentSection = "";
+            } else if (trimmed.startsWith("PROMPT:")) {
+                currentSection = "PROMPT";
+            } else if (trimmed.startsWith("CODE:")) {
+                currentSection = "CODE";
+            } else if (trimmed.startsWith("ANSWER:")) {
+                answer = trimmed.substring(7).trim();
+                currentSection = "";
+            } else if (trimmed.startsWith("EXPLANATION:")) {
+                explanation = trimmed.substring(12).trim();
+                currentSection = "";
+            } else {
+                if ("PROMPT".equals(currentSection)) {
+                    prompt.append(trimmed).append("\n");
+                } else if ("CODE".equals(currentSection)) {
+                    code.append(line).append("\n");
+                }
+            }
+        }
+
+        Challenge created = buildChallenge(
+                type, id, prompt.toString().trim(), code.toString().stripTrailing(), diff, answer, explanation
+        );
+        if (created != null) {
+            challenges.add(created);
         }
     }
 
-    // Turns one block of KEY=VALUE lines into a Challenge object.
-    private static Challenge buildChallenge(List<String> lines, int questionNumber)
-            throws InvalidChallengeException {
+    private static Challenge parseLegacyBlock(List<String> lines) {
         String type = null;
         String code = null;
         List<String> choices = new ArrayList<>();
-        int answer = -1; // 1-based in the file
+        int answer = -1;
 
         for (String line : lines) {
             if (line.isBlank() || line.trim().startsWith("#")) {
                 continue;
             }
             int equals = line.indexOf('=');
-            if (equals < 0) {
-                throw new InvalidChallengeException("Question " + questionNumber + ": expected KEY=VALUE but got '" + line + "'");
-            }
+            if (equals < 0) continue;
             String key = line.substring(0, equals).trim().toUpperCase();
             String value = line.substring(equals + 1).trim();
 
             switch (key) {
                 case "TYPE" -> type = value;
-                case "CODE" -> code = value.replace("\\n", "\n"); // file has a literal backslash-n
+                case "CODE" -> code = value.replace("\\n", "\n");
                 case "CHOICE" -> choices.add(value);
                 case "ANSWER" -> {
                     try {
                         answer = Integer.parseInt(value);
-                    } catch (NumberFormatException e) {
-                        throw new InvalidChallengeException("Question " + questionNumber + ": ANSWER must be a number");
-                    }
+                    } catch (NumberFormatException ignored) { }
                 }
-                default -> throw new InvalidChallengeException("Question " + questionNumber + ": unknown key " + key);
             }
         }
 
-        if (type == null) {
-            throw new InvalidChallengeException("Question " + questionNumber + ": missing TYPE");
+        if ("PREDICT_OUTPUT".equalsIgnoreCase(type) && code != null) {
+            return new PredictOutputChallenge(code, choices, answer > 0 ? answer - 1 : 0);
         }
-        if (type.equals("PREDICT_OUTPUT")) {
-            if (code == null || choices.size() < 2 || answer < 1 || answer > choices.size()) {
-                throw new InvalidChallengeException("Question " + questionNumber
-                        + ": needs CODE, at least 2 CHOICE lines, and an ANSWER between 1 and the number of choices");
+        return null;
+    }
+
+    private static Challenge buildChallenge(String type, String id, String prompt, String code,
+                                            Difficulty diff, String answer, String explanation) {
+        return switch (type.toUpperCase()) {
+            case "PREDICT", "PREDICT_OUTPUT" -> new PredictOutputChallenge(id, prompt, code, diff, answer);
+            case "FILL_BLANK" -> new FillBlankChallenge(id, prompt, code, diff, answer);
+            case "SPOT_BUG" -> new SpotTheBugChallenge(id, prompt, code, diff, answer, explanation);
+            case "ARRANGE" -> new ArrangeCodeChallenge(id, prompt, code, diff, answer);
+            default -> {
+                System.err.println("Unknown challenge type: " + type);
+                yield null;
             }
-            return new PredictOutputChallenge(code, choices, answer - 1);
-        }
-        throw new InvalidChallengeException("Question " + questionNumber + ": unknown TYPE " + type);
+        };
     }
 }

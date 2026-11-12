@@ -1,29 +1,47 @@
 package challenge;
 
-import java.util.List;
+import battle.Difficulty;
 
-// TODO (Andrew)
-/** Challenge where the player puts shuffled lines of code into the right order. */
+/**
+ * Challenge where the player arranges scrambled lines of code into the valid order.
+ * Owner: Andrew.
+ */
 public class ArrangeCodeChallenge extends Challenge {
+    private final String expectedOrder;
 
-    private List<String> correctOrder; // TODO (Andrew): the lines in their correct order
-
-    /** @param shuffledLines the lines as shown to the player; @param correctOrder the solution */
-    public ArrangeCodeChallenge(String prompt, List<String> shuffledLines, List<String> correctOrder) {
-        super(prompt, shuffledLines);
-        // TODO (Andrew)
+    public ArrangeCodeChallenge(String id, String prompt, String codeSnippet, Difficulty difficulty, String expectedOrder) {
+        super(id, prompt, codeSnippet, difficulty);
+        this.expectedOrder = normalizeOrder(expectedOrder);
     }
 
-    /** True if the player's ordering matches the solution. The answer is line numbers in order, e.g. "3,1,2,4". */
+    // Converts inputs like "2, 1, 3" or "2 1 3" into "2,1,3"
+    private String normalizeOrder(String input) {
+        if (input == null) {
+            return "";
+        }
+        return input.trim().replaceAll("[\\s,]+", ",");
+    }
+
+    @Override
+    public boolean evaluateAnswer(String playerAnswer) {
+        if (playerAnswer == null || playerAnswer.isBlank()) {
+            return false;
+        }
+        return normalizeOrder(playerAnswer).equals(expectedOrder);
+    }
+
     @Override
     public boolean isCorrect(String answer) {
-        // TODO (Andrew)
-        return false;
+        return evaluateAnswer(answer);
+    }
+
+    @Override
+    public String getExplanation() {
+        return "The correct line sequence is: " + expectedOrder;
     }
 
     @Override
     public String getTypeLabel() {
-        // TODO (Andrew)
         return "Arrange the Code";
     }
 }

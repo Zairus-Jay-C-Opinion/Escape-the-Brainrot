@@ -1,34 +1,26 @@
 package battle;
 
-import java.util.Set;
-
-// TODO (Andrew)
 /**
- * One stage of a boss fight. Each boss owns a list of these.
- * A phase starts once the boss's HP drops to hpThreshold, and sets the difficulty and modifiers for its questions.
+ * Represents boss battle phases and their difficulty modifiers.
+ * Owner: Andrew.
  */
-public class Phase {
+public enum Phase {
+    NORMAL("Phase 1: Normal", 1.0),
+    ENRAGED("Phase 2: OVERCLOCKED", 1.5);
 
-    private int hpThreshold;          // TODO (Andrew): HP at or below which this phase begins
-    private Difficulty difficulty;    // TODO (Andrew)
-    private Set<Modifier> modifiers;  // TODO (Andrew)
+    private final String label;
+    private final double strainMultiplier;
 
-    public Phase(int hpThreshold, Difficulty difficulty, Set<Modifier> modifiers) {
-        // TODO (Andrew)
+    Phase(String label, double strainMultiplier) {
+        this.label = label;
+        this.strainMultiplier = strainMultiplier;
     }
 
-    public int getHpThreshold() {
-        // TODO (Andrew)
-        return 0;
+    public String getLabel() {
+        return label;
     }
 
-    public Difficulty getDifficulty() {
-        // TODO (Andrew)
-        return null;
-    }
-
-    public Set<Modifier> getModifiers() {
-        // TODO (Andrew)
-        return null;
+    public double getStrainMultiplier() {
+        return strainMultiplier;
     }
 }
