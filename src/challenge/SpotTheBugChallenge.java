@@ -1,29 +1,46 @@
 package challenge;
 
-import java.util.List;
+import battle.Difficulty;
 
-// TODO (Andrew)
-/** Challenge where the player picks the line of code that contains the bug. */
+/**
+ * Challenge where the player identifies the line number containing a bug.
+ * Owner: Andrew.
+ */
 public class SpotTheBugChallenge extends Challenge {
+    private final String buggyLine;
+    private final String explanation;
 
-    private int buggyLineIndex; // TODO (Andrew): which line (0-based) holds the bug
-
-    /** @param codeWithBug the code to show; @param lines the selectable lines; @param buggyLineIndex the right one */
-    public SpotTheBugChallenge(String codeWithBug, List<String> lines, int buggyLineIndex) {
-        super(codeWithBug, lines);
-        // TODO (Andrew)
+    public SpotTheBugChallenge(String id, String prompt, String codeSnippet, Difficulty difficulty, String buggyLine, String explanation) {
+        super(id, prompt, codeSnippet, difficulty);
+        this.buggyLine = buggyLine != null ? buggyLine.trim() : "";
+        this.explanation = explanation;
     }
 
-    /** True if the chosen line number (counted from 1, e.g. "2") is the buggy one. */
+    @Override
+    public boolean evaluateAnswer(String playerAnswer) {
+        if (playerAnswer == null) {
+            return false;
+        }
+        // Normalize inputs so both "3" and "line 3" are accepted
+        String cleaned = playerAnswer.trim().toLowerCase().replace("line", "").trim();
+        return cleaned.equals(buggyLine);
+    }
+
     @Override
     public boolean isCorrect(String answer) {
-        // TODO (Andrew)
-        return false;
+        return evaluateAnswer(answer);
+    }
+
+    @Override
+    public String getExplanation() {
+        if (explanation == null || explanation.isEmpty()) {
+            return "The bug was on line " + buggyLine + ".";
+        }
+        return explanation;
     }
 
     @Override
     public String getTypeLabel() {
-        // TODO (Andrew)
         return "Spot the Bug";
     }
 }

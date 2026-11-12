@@ -1,33 +1,52 @@
 package battle;
 
-// TODO (Andrew)
-/** Countdown for answering a question; drives time-based Strain. */
+/**
+ * Frame-based countdown timer synced to the 60 FPS game loop.
+ * Owner: Andrew.
+ */
 public class BattleTimer {
+    private static final int TICKS_PER_SECOND = 60;
 
-    private double secondsRemaining; // TODO (Andrew)
-    private boolean running;         // TODO (Andrew)
+    private final int maxSeconds;
+    private int remainingTicks;
+    private boolean paused;
 
-    /** Starts counting down from the given number of seconds. */
-    public void start(double seconds) {
-        // TODO (Andrew)
+    public BattleTimer(int maxSeconds) {
+        this.maxSeconds = maxSeconds;
+        this.remainingTicks = maxSeconds * TICKS_PER_SECOND;
+        this.paused = false;
     }
 
-    /** Called every update (1/60 s). */
-    public void tick() {
-        // TODO (Andrew)
+    /**
+     * Advances the timer by one frame. Returns true on the exact tick time expires.
+     */
+    public boolean tick() {
+        if (paused || remainingTicks <= 0) {
+            return false;
+        }
+        remainingTicks--;
+        return remainingTicks == 0;
     }
 
-    public void stop() {
-        // TODO (Andrew)
+    public void reset() {
+        this.remainingTicks = maxSeconds * TICKS_PER_SECOND;
     }
 
-    public boolean isExpired() {
-        // TODO (Andrew)
-        return false;
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 
-    public double getSecondsRemaining() {
-        // TODO (Andrew)
-        return 0;
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public int getRemainingSeconds() {
+        // Round up so 1 tick left still displays as 1s
+        return (int) Math.ceil((double) remainingTicks / TICKS_PER_SECOND);
+    }
+
+    public double getTimeRatio() {
+        if (maxSeconds <= 0) return 0;
+        return (double) remainingTicks / (maxSeconds * TICKS_PER_SECOND);
     }
 }

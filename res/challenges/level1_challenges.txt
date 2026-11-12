@@ -1,0 +1,30 @@
+ID: OOP-11
+TYPE: SPOT_BUG
+DIFFICULTY: EASY
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: abstract class Enemy {
+2:     abstract void attack();
+3: }
+4: public class Main {
+5:     public static void main(String[] args) {
+6:         Enemy e = new Enemy();
+7:     }
+8: }
+ANSWER: 6
+EXPLANATION: Line 6 tries to instantiate an abstract class directly with 'new Enemy()'.
+---
+ID: OOP-12
+TYPE: ARRANGE
+DIFFICULTY: MEDIUM
+PROMPT:
+Enter the line numbers in the correct order to define an encapsulated class (e.g. 1,2,3,4):
+CODE:
+1:     public int getHp() { return hp; }
+2: public class Hero {
+3: }
+4:     private int hp = 100;
+ANSWER: 2,4,1,3
+---
+
