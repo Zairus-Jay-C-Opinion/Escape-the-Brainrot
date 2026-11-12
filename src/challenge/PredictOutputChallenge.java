@@ -1,21 +1,47 @@
 package challenge;
 
+import battle.Difficulty;
+
 import java.util.List;
 
-/** "What does this code print?" multiple-choice challenge. Owner: Andrew (written by Zrs as the working example). */
+/** "What does this code print?" challenge. Owner: Andrew. */
 public class PredictOutputChallenge extends Challenge {
 
-    private final int correctIndex; // 0-based index into the choices
+    private final String expectedOutput;
+    private final int correctIndex; // 0-based index for multiple-choice
 
     public PredictOutputChallenge(String code, List<String> choices, int correctIndex) {
         super("What does this print?\n" + code, choices);
         this.correctIndex = correctIndex;
+        this.expectedOutput = String.valueOf(correctIndex + 1);
+    }
+
+    public PredictOutputChallenge(String id, String prompt, String codeSnippet, Difficulty difficulty, String expectedOutput) {
+        super(id, prompt != null && !prompt.isEmpty() ? prompt : "What does this print?", codeSnippet, difficulty);
+        this.expectedOutput = expectedOutput != null ? expectedOutput.trim() : "";
+        this.correctIndex = -1;
+    }
+
+    @Override
+    public boolean evaluateAnswer(String answer) {
+        if (answer == null) {
+            return false;
+        }
+        String clean = answer.trim();
+        if (correctIndex >= 0 && clean.equals(String.valueOf(correctIndex + 1))) {
+            return true;
+        }
+        return clean.equalsIgnoreCase(expectedOutput);
     }
 
     @Override
     public boolean isCorrect(String answer) {
-        // Answers are 1-based ("1" is the first choice) but correctIndex is 0-based.
-        return answer.trim().equals(String.valueOf(correctIndex + 1));
+        return evaluateAnswer(answer);
+    }
+
+    @Override
+    public String getExplanation() {
+        return "Expected output: " + expectedOutput;
     }
 
     @Override
