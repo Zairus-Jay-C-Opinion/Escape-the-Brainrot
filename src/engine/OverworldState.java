@@ -47,7 +47,7 @@ public class OverworldState extends GameState {
         boolean justArrived = player.update();
         if (justArrived && map.getTile(player.getTileX(), player.getTileY()) == TileMap.BOSS_TRIGGER) {
             // Pass "this" so the battle can hand control back to the same overworld afterwards.
-            manager.setState(new BattleState(manager, this, new TestBoss()));
+            manager.setState(new BattleState(manager, this, new TestBoss(), manager.getGauge()));
         }
     }
 
