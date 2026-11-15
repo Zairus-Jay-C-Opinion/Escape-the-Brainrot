@@ -18,7 +18,7 @@ public class DialogueBox {
     private static final int TAB_HEIGHT = 32;
     private static final int PADDING = 22;
     private static final int LINE_HEIGHT = 22;
-    private static final double CHARS_PER_UPDATE = 0.7;
+    private static final double CHARS_PER_UPDATE = 1.0;
 
     private String speaker = "";
     private String text = "";

@@ -56,11 +56,11 @@ public class Hud {
 
     /** Screen position where Strain numbers should float up from. */
     public int getStrainLabelX() {
-        return BAR_X + BAR_WIDTH - 30;
+        return BAR_X;
     }
 
     public int getStrainLabelY() {
-        return BAR_Y + 34;
+        return BAR_Y + 56;
     }
 
     public void draw(Graphics2D g) {

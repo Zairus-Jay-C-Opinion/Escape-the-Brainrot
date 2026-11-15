@@ -47,7 +47,7 @@ public class FloatingTexts {
     }
 
     public void draw(Graphics2D g) {
-        g.setFont(UiTheme.MONO_LARGE.deriveFont(22f));
+        g.setFont(UiTheme.MONO_LARGE.deriveFont(26f));
         for (Floater f : floaters) {
             float fade = Math.min(1f, 2f * (1f - (float) f.age / LIFE_TICKS));
             g.setComposite(AlphaComposite.SrcOver.derive(fade));

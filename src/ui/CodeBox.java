@@ -17,13 +17,13 @@ import java.util.regex.Pattern;
  */
 public class CodeBox {
 
-    private static final Font PROMPT_FONT = new Font(Font.MONOSPACED, Font.BOLD, 13);
-    private static final Font CODE_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+    private static final Font PROMPT_FONT = new Font(Font.MONOSPACED, Font.BOLD, 14);
+    private static final Font CODE_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 13);
     private static final int TITLE_BAR_HEIGHT = 24;
     private static final int PADDING = 12;
     private static final int GUTTER_WIDTH = 30;
-    private static final int PROMPT_LINE_HEIGHT = 17;
-    private static final int CODE_LINE_HEIGHT = 16;
+    private static final int PROMPT_LINE_HEIGHT = 19;
+    private static final int CODE_LINE_HEIGHT = 18;
     // Challenge files may already number their lines ("3: int x;"); those numbers are what the answer refers to.
     private static final Pattern LABELLED_LINE = Pattern.compile("^\\s*(\\d+):\\s?(.*)$");
 
@@ -142,7 +142,7 @@ public class CodeBox {
             } else {
                 g.setFont(PROMPT_FONT);
                 g.setColor(UiTheme.CREAM);
-                g.drawString(row.text, x + PADDING, rowY + 13);
+                g.drawString(row.text, x + PADDING, rowY + 14);
                 rowY += PROMPT_LINE_HEIGHT;
             }
         }
@@ -159,9 +159,9 @@ public class CodeBox {
         }
         g.setFont(CODE_FONT);
         g.setColor(new Color(110, 170, 170));
-        g.drawString(row.gutter, x + PADDING, rowY + 12);
+        g.drawString(row.gutter, x + PADDING, rowY + 13);
         g.setColor(new Color(190, 230, 225));
-        g.drawString(row.text, x + PADDING + GUTTER_WIDTH, rowY + 12);
+        g.drawString(row.text, x + PADDING + GUTTER_WIDTH, rowY + 13);
     }
 
     /** Draws the typed-answer line inside the answer strip. */
