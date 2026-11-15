@@ -20,10 +20,12 @@ public class TileMap {
     public static final int FLOOR = 0;
     public static final int WALL = 1;          // solid
     public static final int BOSS_TRIGGER = 2;  // stepping here starts a battle
+    public static final int DEFEATED_BOSS = 3; // a beaten boss's tile: walkable and never triggers again
 
     private static final Color FLOOR_COLOR = new Color(40, 40, 52);
     private static final Color WALL_COLOR = Color.GRAY;
     private static final Color BOSS_COLOR = Color.RED;
+    private static final Color DEFEATED_COLOR = new Color(58, 44, 66);
 
     private final int[][] tiles; // indexed [row][column]
 
@@ -65,7 +67,7 @@ public class TileMap {
             } catch (NumberFormatException e) {
                 throw new LevelLoadException("Bad tile '" + parts[i].trim() + "' on map line " + lineNumber, e);
             }
-            if (row[i] < FLOOR || row[i] > BOSS_TRIGGER) {
+            if (row[i] < FLOOR || row[i] > DEFEATED_BOSS) {
                 throw new LevelLoadException("Unknown tile " + row[i] + " on map line " + lineNumber);
             }
         }
@@ -88,6 +90,13 @@ public class TileMap {
         return tiles[row][column];
     }
 
+    /** Changes one tile, e.g. to mark a boss as defeated. Ignored outside the map. */
+    public void setTile(int column, int row, int tile) {
+        if (row >= 0 && row < tiles.length && column >= 0 && column < tiles[row].length) {
+            tiles[row][column] = tile;
+        }
+    }
+
     public boolean isSolid(int column, int row) {
         return getTile(column, row) == WALL;
     }
@@ -99,6 +108,11 @@ public class TileMap {
             for (int column = 0; column < tiles[row].length; column++) {
                 g.setColor(colorFor(tiles[row][column]));
                 g.fillRect(column * size, row * size, size, size);
+                if (tiles[row][column] == DEFEATED_BOSS) {
+                    g.setColor(new Color(120, 96, 140));
+                    g.drawLine(column * size + 12, row * size + 12, column * size + size - 12, row * size + size - 12);
+                    g.drawLine(column * size + size - 12, row * size + 12, column * size + 12, row * size + size - 12);
+                }
             }
         }
     }
@@ -107,6 +121,7 @@ public class TileMap {
         return switch (tile) {
             case WALL -> WALL_COLOR;
             case BOSS_TRIGGER -> BOSS_COLOR;
+            case DEFEATED_BOSS -> DEFEATED_COLOR;
             default -> FLOOR_COLOR;
         };
     }
