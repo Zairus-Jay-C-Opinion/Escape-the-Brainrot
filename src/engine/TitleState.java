@@ -87,6 +87,8 @@ public class TitleState extends GameState {
 
     private final MenuItem[] menu = MenuItem.values();
     private int selected = 0;
+    private int lastMouseX = -1;
+    private int lastMouseY = -1;
 
     private int ticksUntilFlash = randomFlashGap();
     private int flashTick = -1;        // -1 means no flash is running
@@ -218,12 +220,48 @@ public class TitleState extends GameState {
             moveSelection(1);
         }
         if (input.wasPressed(Action.CONFIRM)) {
-            switch (menu[selected]) {
-                case NEW_GAME -> fading = true;
-                case EXIT -> System.exit(0);
-                default -> { }
+            activateSelected();
+        }
+
+        MouseInput mouse = manager.getMouse();
+        int hovered = buttonAt(mouse.getX(), mouse.getY());
+        boolean usable = hovered >= 0 && menu[hovered].enabled;
+        // Only a real mouse move steals the highlight, so the keyboard still works while the pointer rests on a button.
+        boolean moved = mouse.getX() != lastMouseX || mouse.getY() != lastMouseY;
+        lastMouseX = mouse.getX();
+        lastMouseY = mouse.getY();
+        if (usable && (moved || mouse.wasClicked())) {
+            selected = hovered;
+        }
+        if (usable && mouse.wasClicked()) {
+            activateSelected();
+        }
+    }
+
+    private void activateSelected() {
+        switch (menu[selected]) {
+            case NEW_GAME -> fading = true;
+            case EXIT -> System.exit(0);
+            default -> { }
+        }
+    }
+
+    private int buttonX(int index) {
+        int totalWidth = menu.length * MENU_BUTTON_WIDTH + (menu.length - 1) * MENU_BUTTON_GAP;
+        return (GamePanel.SCREEN_WIDTH - totalWidth) / 2 + index * (MENU_BUTTON_WIDTH + MENU_BUTTON_GAP);
+    }
+
+    /** Index of the button under the given game-pixel point, or -1. */
+    private int buttonAt(int gameX, int gameY) {
+        if (gameY < MENU_Y || gameY >= MENU_Y + MENU_BUTTON_HEIGHT) {
+            return -1;
+        }
+        for (int i = 0; i < menu.length; i++) {
+            if (gameX >= buttonX(i) && gameX < buttonX(i) + MENU_BUTTON_WIDTH) {
+                return i;
             }
         }
+        return -1;
     }
 
     private void moveSelection(int step) {
@@ -318,11 +356,10 @@ public class TitleState extends GameState {
     }
 
     private void drawMenu(Graphics2D g) {
-        int totalWidth = menu.length * MENU_BUTTON_WIDTH + (menu.length - 1) * MENU_BUTTON_GAP;
-        int x = (GamePanel.SCREEN_WIDTH - totalWidth) / 2;
         g.setFont(MENU_FONT);
 
         for (int i = 0; i < menu.length; i++) {
+            int x = buttonX(i);
             boolean isSelected = i == selected;
             Color top;
             Color bottom;
@@ -350,7 +387,6 @@ public class TitleState extends GameState {
             }
             g.setColor(text);
             drawCentered(g, menu[i].label, x, MENU_BUTTON_WIDTH, MENU_Y + 25);
-            x += MENU_BUTTON_WIDTH + MENU_BUTTON_GAP;
         }
     }
 

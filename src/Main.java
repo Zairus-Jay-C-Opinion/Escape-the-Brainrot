@@ -1,6 +1,7 @@
 // Main: program entry point. Loads config, opens the window, starts the game loop. Owner: Zrs.
 
 import engine.Config;
+import engine.Display;
 import engine.GamePanel;
 import exception.AssetLoadException;
 
@@ -24,11 +25,8 @@ public class Main {
             JFrame frame = new JFrame("Escape the Brainrot: Reclaim Your Mind");
             GamePanel panel = new GamePanel();
             frame.add(panel);
-            frame.pack(); // sizes the window to the panel's preferred size
-            frame.setResizable(false);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
+            new Display(frame, panel).setFullscreen(true);
             panel.requestFocusInWindow();
             panel.start();
         });
