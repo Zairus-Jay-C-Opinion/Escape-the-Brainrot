@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 
 /** The game window's drawing surface and the 60-updates-per-second game loop. Owner: Zrs. */
 public class GamePanel extends JPanel implements Runnable {
@@ -19,9 +20,13 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int SCREEN_HEIGHT = SCREEN_ROWS * SCALED_TILE_SIZE;    // 576
 
     private static final int UPDATES_PER_SECOND = 60;
+    // Use VALUE_INTERPOLATION_NEAREST_NEIGHBOR for sharp pixels or BICUBIC for the smoothest (slowest) look.
+    public static final Object SCALING_QUALITY = RenderingHints.VALUE_INTERPOLATION_BILINEAR;
 
     private final InputHandler input = new InputHandler();
-    private final StateManager stateManager = new StateManager(input);
+    private final MouseInput mouse = new MouseInput();
+    private final StateManager stateManager = new StateManager(input, mouse);
+    private final BufferedImage frame = new BufferedImage(SCREEN_WIDTH, SCREEN_HEIGHT, BufferedImage.TYPE_INT_RGB);
     private Thread gameThread;
     private volatile boolean running;
 
@@ -30,6 +35,8 @@ public class GamePanel extends JPanel implements Runnable {
         setBackground(Color.BLACK);
         setFocusable(true); // needed to receive key events
         addKeyListener(input);
+        addMouseListener(mouse);
+        addMouseMotionListener(mouse);
         stateManager.setState(new TitleState(stateManager));
     }
 
@@ -59,6 +66,7 @@ public class GamePanel extends JPanel implements Runnable {
             while (owedUpdates >= 1) {
                 stateManager.update();
                 input.endFrame();
+                mouse.endFrame();
                 owedUpdates--;
             }
             repaint();
@@ -74,9 +82,19 @@ public class GamePanel extends JPanel implements Runnable {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        super.paintComponent(g); // clears the window to black, which becomes the bars around the picture
+
+        Graphics2D frameGraphics = frame.createGraphics();
+        frameGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        frameGraphics.setColor(Color.BLACK);
+        frameGraphics.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        stateManager.draw(frameGraphics);
+        frameGraphics.dispose();
+
+        ViewTransform view = ViewTransform.fit(getWidth(), getHeight(), SCREEN_WIDTH, SCREEN_HEIGHT);
+        mouse.setView(view);
         Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        stateManager.draw(g2);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, SCALING_QUALITY);
+        g2.drawImage(frame, view.getOffsetX(), view.getOffsetY(), view.getDrawWidth(), view.getDrawHeight(), null);
     }
 }
