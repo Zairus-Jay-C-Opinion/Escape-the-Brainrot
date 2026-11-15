@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class BattleState extends GameState {
 
-    private enum Stage { INTRO, QUESTION, PHASE_CHANGE, DEFEAT, END_WAIT, FRIED }
+    private enum Stage { INTRO, QUESTION, REVIEW, PHASE_CHANGE, DEFEAT, END_WAIT, FRIED }
 
     private static final int TERMINAL_X = 20;
     private static final int TERMINAL_Y = 92;
@@ -98,6 +98,11 @@ public class BattleState extends GameState {
     private int lastMouseY = -1;
 
     public BattleState(StateManager manager, GameState returnTo, Boss boss, BrainrotGauge gauge) {
+        this(manager, returnTo, boss, gauge, List.of(boss));
+    }
+
+    /** levelBosses are the bosses the HUD shows as locked Rot segments. */
+    public BattleState(StateManager manager, GameState returnTo, Boss boss, BrainrotGauge gauge, List<Boss> levelBosses) {
         super(manager);
         this.returnTo = returnTo;
         this.boss = boss;
@@ -109,7 +114,7 @@ public class BattleState extends GameState {
         this.deck = new ChallengeDeck(loadChallenges(boss));
         this.timer = new BattleTimer(Difficulty.EASY.getStrainIntervalSeconds());
         timer.setPaused(true);
-        this.hud = new Hud(gauge);
+        this.hud = new Hud(gauge, levelBosses);
         this.backdrop = new BattleBackdrop(boss.getStyle(boss.getCurrentPhase()));
         this.bossView = new BossView(boss.getSpritePath());
 
@@ -162,6 +167,8 @@ public class BattleState extends GameState {
     private void loadNextQuestion() {
         current = deck.draw();
         typed = "";
+        // Anything said about the previous question must not sit under the new one.
+        dialogue.show("");
 
         boolean choices = current.getAnswerInput() == AnswerInput.CHOICE;
         int answerHeight = choices ? current.getChoices().size() * CHOICE_ROW_HEIGHT + 12 : TYPED_AREA_HEIGHT;
@@ -209,8 +216,10 @@ public class BattleState extends GameState {
         } else if (boss.getCurrentPhase() != before) {
             startPhaseChange();
         } else {
+            // The solved question stays on screen with its note until the player is ready for the next one.
             dialogue.show(boss.getName(), boss.getHitLine() + note);
-            loadNextQuestion();
+            stage = Stage.REVIEW;
+            timer.setPaused(true);
         }
     }
 
@@ -296,6 +305,7 @@ public class BattleState extends GameState {
         boolean clicked = mouse.wasClicked();
         switch (stage) {
             case INTRO, END_WAIT -> updateWaiting(keys, clicked);
+            case REVIEW -> updateReview(keys, clicked);
             case QUESTION -> updateQuestion(keys, clicked, mouse);
             case PHASE_CHANGE -> updatePhaseChange();
             case DEFEAT -> updateDefeat();
@@ -322,8 +332,8 @@ public class BattleState extends GameState {
     }
 
     // First press finishes the typewriter line, the next one moves on.
-    private boolean continuePressed(List<int[]> keys, boolean clicked) {
-        dialogue.setWaiting(true);
+    private boolean continuePressed(List<int[]> keys, boolean clicked, String prompt) {
+        dialogue.setPrompt(prompt);
         if (!wantsContinue(keys, clicked)) {
             return false;
         }
@@ -335,15 +345,24 @@ public class BattleState extends GameState {
     }
 
     private void updateWaiting(List<int[]> keys, boolean clicked) {
-        if (!continuePressed(keys, clicked)) {
+        String prompt = stage == Stage.INTRO ? "Press ENTER to fight" : "Press ENTER to continue";
+        if (!continuePressed(keys, clicked, prompt)) {
             return;
         }
         if (stage == Stage.INTRO) {
             stage = Stage.QUESTION;
-            dialogue.setWaiting(false);
+            dialogue.setPrompt("");
             timer.setPaused(false);
         } else {
             leave();
+        }
+    }
+
+    private void updateReview(List<int[]> keys, boolean clicked) {
+        if (continuePressed(keys, clicked, "Press ENTER for the next question")) {
+            loadNextQuestion();
+            stage = Stage.QUESTION;
+            timer.setPaused(false);
         }
     }
 
@@ -467,7 +486,7 @@ public class BattleState extends GameState {
         // Bursts of heavy tearing with calmer frames between, so the title stays readable.
         boolean burst = stageTicks % FRIED_BURST_PERIOD_TICKS < FRIED_BURST_TICKS;
         vhs.glitch(2, burst ? FRIED_GLITCH_BURST : FRIED_GLITCH_IDLE);
-        if (stageTicks >= FRIED_MIN_TICKS && continuePressed(keys, clicked)) {
+        if (stageTicks >= FRIED_MIN_TICKS && continuePressed(keys, clicked, "Press ENTER to continue")) {
             leave();
         }
     }

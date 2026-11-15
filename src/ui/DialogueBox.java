@@ -3,7 +3,6 @@ package ui;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class DialogueBox {
     private String speaker = "";
     private String text = "";
     private double revealed;
-    private boolean waiting;
+    private String prompt = "";
     private int ticks;
     private List<String> wrapped; // rebuilt lazily because wrapping needs the font metrics from a Graphics2D
 
@@ -37,12 +36,12 @@ public class DialogueBox {
         this.text = text;
         this.revealed = 0;
         this.wrapped = null;
-        this.waiting = false;
+        this.prompt = "";
     }
 
-    /** When true, a blinking arrow tells the player the box is waiting for a key or click. */
-    public void setWaiting(boolean waiting) {
-        this.waiting = waiting;
+    /** Once the line has finished typing, this blinks on the line under it. Empty means the box is not waiting for anything. */
+    public void setPrompt(String prompt) {
+        this.prompt = prompt;
     }
 
     public void update() {
@@ -88,11 +87,9 @@ public class DialogueBox {
             y += LINE_HEIGHT;
         }
 
-        if (waiting && isFinished() && (ticks / 20) % 2 == 0) {
-            int ax = BOX_X + BOX_WIDTH - 36;
-            int ay = BOX_Y + BOX_HEIGHT - 26;
-            g.setColor(UiTheme.CREAM);
-            g.fillPolygon(new Polygon(new int[] {ax, ax + 14, ax + 7}, new int[] {ay, ay, ay + 9}, 3));
+        if (!prompt.isEmpty() && isFinished() && (ticks / 24) % 2 == 0) {
+            g.setColor(new Color(240, 210, 120));
+            g.drawString(prompt, BOX_X + PADDING, Math.min(y, BOX_Y + BOX_HEIGHT - 12));
         }
     }
 
