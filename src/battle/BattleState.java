@@ -69,7 +69,8 @@ public class BattleState extends GameState {
 
         // Dispatcher for typing answers directly without modifying engine.InputHandler
         this.keyDispatcher = e -> {
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
+            // Cmd or Ctrl means a shortcut such as fullscreen, not an answer character.
+            if (e.getID() == KeyEvent.KEY_PRESSED && !e.isMetaDown() && !e.isControlDown()) {
                 handleKeyPressed(e.getKeyCode(), e.getKeyChar());
             }
             return false;
