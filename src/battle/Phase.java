@@ -1,26 +1,34 @@
 package battle;
 
-/**
- * Represents boss battle phases and their difficulty modifiers.
- * Owner: Andrew.
- */
+import engine.Config;
+
+/** Boss battle phases. Each one carries its own Modifier. */
 public enum Phase {
-    NORMAL("Phase 1: Normal", 1.0),
-    ENRAGED("Phase 2: OVERCLOCKED", 1.5);
+    NORMAL(1, Modifier.NONE),
+    ENRAGED(2, Modifier.OVERCLOCK);
 
-    private final String label;
-    private final double strainMultiplier;
+    private final int number;
+    private final Modifier modifier;
 
-    Phase(String label, double strainMultiplier) {
-        this.label = label;
-        this.strainMultiplier = strainMultiplier;
+    Phase(int number, Modifier modifier) {
+        this.number = number;
+        this.modifier = modifier;
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     public String getLabel() {
-        return label;
+        return "PHASE " + number;
     }
 
+    public Modifier getModifier() {
+        return modifier;
+    }
+
+    /** How much more a wrong answer costs in this phase. */
     public double getStrainMultiplier() {
-        return strainMultiplier;
+        return this == ENRAGED ? Config.getDouble("phase2.wrongMultiplier") : 1.0;
     }
 }

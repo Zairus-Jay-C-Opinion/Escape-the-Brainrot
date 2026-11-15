@@ -57,6 +57,11 @@ public class BrainrotGauge {
         rot = Math.max(0, rot - amount);
     }
 
+    /** Puts Strain back to its starting value, used after the brain gets fried. */
+    public void resetStrain() {
+        strain = Config.getDouble("strain.start");
+    }
+
     /** True once the total reaches gauge.max. */
     public boolean isFried() {
         return getTotal() >= maxGauge;
