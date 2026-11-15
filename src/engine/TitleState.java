@@ -40,8 +40,8 @@ public class TitleState extends GameState {
     private static final float FLASH_WHITE_ALPHA = 0.12f;
     private static final float FLASH_LIT_BRIGHTNESS = 5f;     // how steeply the dark parts of the room are lifted in a flash
     private static final int FLASH_LIT_CEILING = 235;         // brightest value the lit copy can reach, so he never turns pure white
-    private static final double MIN_THUNDER_DELAY_SECONDS = 0.5;
-    private static final double MAX_THUNDER_DELAY_SECONDS = 1.5;
+    private static final double MIN_THUNDER_DELAY_SECONDS = 0.1;
+    private static final double MAX_THUNDER_DELAY_SECONDS = 0.4;
 
     private static final int RAIN_DROP_COUNT = 300;
     private static final int FADE_OUT_TICKS = 45;
