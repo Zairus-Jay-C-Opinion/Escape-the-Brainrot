@@ -1,7 +1,10 @@
 package battle;
 
+import java.util.List;
+
 /**
- * Abstract boss base class with HP, locked Rot, and phase transitions.
+ * Abstract boss: HP, locked Rot, phase changes, and all the data a fight needs (sprite, questions, dialogue, look).
+ * Subclasses override the getters to make a boss their own, so the battle screen never needs to know which boss it has.
  * Owner: Andrew.
  */
 public abstract class Boss {
@@ -35,6 +38,11 @@ public abstract class Boss {
         return currentHp;
     }
 
+    /** The share of the player's Rot that disappears when this boss is beaten. */
+    public int getRotShare() {
+        return lockedRot;
+    }
+
     public int getLockedRot() {
         return lockedRot;
     }
@@ -64,16 +72,61 @@ public abstract class Boss {
         return currentHp <= 0;
     }
 
-    /**
-     * Hook called when the boss enters a new phase. Subclasses may override.
-     */
-    public void onPhaseChange(Phase newPhase) {
-        System.out.println(name + " entered " + newPhase.getLabel() + "!");
+    /** Back to full HP and Phase 1, for a retry after the brain got fried. Never call on a defeated boss. */
+    public void reset() {
+        currentHp = maxHp;
+        currentPhase = Phase.NORMAL;
+    }
+
+    /** Hook called when the boss enters a new phase. Subclasses may override. */
+    public void onPhaseChange(Phase newPhase) { }
+
+    public abstract void onDefeat();
+
+    /** The OOP concept this boss tests, shown on the code terminal. */
+    public String getConcept() {
+        return "Java OOP";
+    }
+
+    /** Classpath path of the sprite image. A missing file is replaced by a silhouette. */
+    public String getSpritePath() {
+        return "/sprites/bosses/missing.png";
+    }
+
+    /** Classpath paths of the challenge files this boss draws its questions from. */
+    public List<String> getChallengeFiles() {
+        return List.of("/challenges/sample.txt");
     }
 
     public String getIntroLine() {
         return "A brainrot entity approaches!";
     }
 
-    public abstract void onDefeat();
+    public String getHitLine() {
+        return "Ow.";
+    }
+
+    public String getWrongLine() {
+        return "Wrong. Try again.";
+    }
+
+    public String getPhase2Line() {
+        return "You have made me angry.";
+    }
+
+    public String getDefeatLine() {
+        return "Impossible...";
+    }
+
+    public PhaseStyle getPhase1Style() {
+        return PhaseStyle.CALM;
+    }
+
+    public PhaseStyle getPhase2Style() {
+        return PhaseStyle.ENRAGED;
+    }
+
+    public PhaseStyle getStyle(Phase phase) {
+        return phase == Phase.NORMAL ? getPhase1Style() : getPhase2Style();
+    }
 }
