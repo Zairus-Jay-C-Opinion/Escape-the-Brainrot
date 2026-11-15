@@ -14,7 +14,8 @@ import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.font.TextAttribute;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
+import java.awt.image.LookupOp;
+import java.awt.image.ShortLookupTable;
 import java.util.Map;
 import java.util.Random;
 
@@ -32,12 +33,13 @@ public class TitleState extends GameState {
     private static final int MAX_SECONDS_BETWEEN_FLASHES = 12;
     private static final int FIRST_PULSE_DECAY_TICKS = 10;
     private static final int SECOND_PULSE_START_TICK = 14;
-    private static final float SECOND_PULSE_PEAK = 0.75f;
-    private static final int SECOND_PULSE_DECAY_TICKS = 18;
+    private static final float SECOND_PULSE_PEAK = 1f;
+    private static final int SECOND_PULSE_DECAY_TICKS = 45;
     private static final int STARE_HOLD_TICKS = 50;       // stare continues this long after the light fades
-    private static final float FLASH_DARKNESS_REMOVED = 0.9f; // how much of the darkness a full flash strips away
-    private static final float FLASH_WHITE_ALPHA = 0.3f;
-    private static final float FLASH_LIT_BRIGHTNESS = 2.4f;   // how much brighter the room gets in a flash
+    private static final float FLASH_DARKNESS_REMOVED = 1f;   // 1 means a full flash strips away all the darkness
+    private static final float FLASH_WHITE_ALPHA = 0.12f;
+    private static final float FLASH_LIT_BRIGHTNESS = 5f;     // how steeply the dark parts of the room are lifted in a flash
+    private static final int FLASH_LIT_CEILING = 235;         // brightest value the lit copy can reach, so he never turns pure white
     private static final double MIN_THUNDER_DELAY_SECONDS = 0.5;
     private static final double MAX_THUNDER_DELAY_SECONDS = 1.5;
 
@@ -132,7 +134,12 @@ public class TitleState extends GameState {
         if (image == null) {
             return null;
         }
-        return new RescaleOp(FLASH_LIT_BRIGHTNESS, 0f, null).filter(image, null);
+        // A curve instead of a plain multiply: dark values shoot up while bright ones flatten out below the ceiling.
+        short[] curve = new short[256];
+        for (int value = 0; value < 256; value++) {
+            curve[value] = (short) Math.round(FLASH_LIT_CEILING * (1 - Math.exp(-FLASH_LIT_BRIGHTNESS * value / 255.0)));
+        }
+        return new LookupOp(new ShortLookupTable(0, curve), null).filter(image, null);
     }
 
     // A black layer with a soft see-through hole, built once and reused every frame.
