@@ -1,10 +1,8 @@
 package battle;
 
-// TODO (Andrew)
-/**
- * Question difficulty. It decides how fast Strain rises and how much a wrong answer costs.
- * The numbers must come from config.properties (keys strain.easy.interval, strain.easy.penalty, etc.).
- */
+import engine.Config;
+
+/** Question difficulty. It decides how often Strain ticks up and by how much. Numbers come from config.properties. */
 public enum Difficulty {
     EASY,
     MEDIUM,
@@ -12,13 +10,15 @@ public enum Difficulty {
 
     /** Seconds between automatic Strain increases. */
     public int getStrainIntervalSeconds() {
-        // TODO (Andrew): read strain.<name>.interval from Config
-        return 0;
+        return Config.getInt("strain." + configName() + ".interval");
     }
 
-    /** Strain added per tick or wrong answer. */
+    /** Strain added per automatic tick. Wrong answers use it as their base cost too. */
     public int getStrainPenalty() {
-        // TODO (Andrew): read strain.<name>.penalty from Config
-        return 0;
+        return Config.getInt("strain." + configName() + ".penalty");
+    }
+
+    private String configName() {
+        return name().toLowerCase();
     }
 }

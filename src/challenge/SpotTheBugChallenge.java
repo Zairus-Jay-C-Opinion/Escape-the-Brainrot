@@ -40,6 +40,21 @@ public class SpotTheBugChallenge extends Challenge {
     }
 
     @Override
+    protected String getDefaultHint() {
+        return "Check each line for something the compiler would reject.";
+    }
+
+    @Override
+    public AnswerInput getAnswerInput() {
+        return AnswerInput.LINE;
+    }
+
+    @Override
+    public String getInputHint() {
+        return "Click the buggy line or type its number";
+    }
+
+    @Override
     public String getTypeLabel() {
         return "Spot the Bug";
     }

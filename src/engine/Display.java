@@ -2,7 +2,7 @@ package engine;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import java.awt.Rectangle;
+import java.awt.GraphicsDevice;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
@@ -47,19 +47,29 @@ public class Display {
 
     /** Must run on the Swing thread. */
     public void setFullscreen(boolean on) {
-        Rectangle screen = frame.getGraphicsConfiguration().getBounds();
+        GraphicsDevice device = frame.getGraphicsConfiguration().getDevice();
         fullscreen = on;
-        // A window's decoration can only change while it is not displayable.
-        frame.dispose();
-        frame.setUndecorated(on);
-        frame.setResizable(!on);
         if (on) {
-            frame.setBounds(screen);
+            // A window's decoration can only change while it is not displayable.
+            frame.dispose();
+            frame.setUndecorated(true);
+            frame.setResizable(false);
+            if (device.isFullScreenSupported()) {
+                // Unlike a window sized to the screen, this makes macOS hide the menu bar and the Dock.
+                device.setFullScreenWindow(frame);
+            } else {
+                frame.setBounds(device.getDefaultConfiguration().getBounds());
+                frame.setVisible(true);
+            }
         } else {
+            device.setFullScreenWindow(null);
+            frame.dispose();
+            frame.setUndecorated(false);
+            frame.setResizable(true);
             frame.pack();
             frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
         }
-        frame.setVisible(true);
         SwingUtilities.invokeLater(panel::requestFocusInWindow);
     }
 }

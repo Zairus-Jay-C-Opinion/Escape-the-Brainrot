@@ -16,7 +16,7 @@ A Java 2D retro horror adventure game for an OOP 101 final project, built by a t
 - Game loop at 60 updates per second in GamePanel; screens extend abstract GameState and are switched by StateManager.
 - Screens: TitleState and OverworldState live in engine/, BattleState lives in battle/.
 - Tile-locked movement: logic in tile coordinates, drawing in pixel coordinates.
-- Gauge = Rot + Strain. Rot is locked per undefeated boss and only drops when that boss is defeated. Strain rises with time, wrong answers, and AI use, and falls with correct answers. Starts at Rot 40, Strain 50. Fried at 100.
+- Rot and Strain are separate meters. Rot is locked per undefeated boss and only drops when that boss is defeated. Strain rises with time, wrong answers, and AI use, and falls with correct answers. Starts at Rot 40, Strain 50. Fried when Strain alone reaches 100 (Rot does not count).
 - All balance numbers live in res/config.properties, never hard-coded.
 - Challenges are loaded from text files in res/challenges/.
 

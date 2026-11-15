@@ -3,21 +3,23 @@ package systems;
 import engine.Config;
 
 /**
- * The Brainrot Gauge = Rot + Strain. Fried at 100.
+ * The Brainrot Gauge: two separate meters.
  * Rot is locked per undefeated boss and only drops when that boss is defeated.
- * Strain rises with time, wrong answers and AI use, and falls with correct answers.
+ * Strain rises with time, wrong answers and AI use, falls with correct answers, and fries the player at the threshold.
  * All numbers come from config.properties.
  */
 public class BrainrotGauge {
 
-    private double rot; 
-    private double strain; 
-    private final double maxGauge; 
+    private double rot;
+    private double strain;
+    private final double maxStrain;
+    private final double friedThreshold;
 
     public BrainrotGauge() {
         this.rot = Config.getDouble("rot.start");
         this.strain = Config.getDouble("strain.start");
-        this.maxGauge = Config.getDouble("gauge.max");
+        this.maxStrain = Config.getDouble("gauge.max");
+        this.friedThreshold = Config.getDouble("strain.fried.threshold");
     }
 
     public double getRot() {
@@ -28,17 +30,12 @@ public class BrainrotGauge {
         return strain;
     }
 
-    /** Rot + Strain. */
-    public double getTotal() {
-        return Math.min(maxGauge, rot + strain);
-    }
-
     /** Raises Strain by the given amount. */
     public void addStrain(double amount) {
         if (amount <= 0) {
             return;
         }
-        strain = Math.min(maxGauge - rot, strain + amount);
+        strain = Math.min(maxStrain, strain + amount);
     }
 
     /** Lowers Strain by the given amount (never below 0). */
@@ -57,9 +54,14 @@ public class BrainrotGauge {
         rot = Math.max(0, rot - amount);
     }
 
-    /** True once the total reaches gauge.max. */
+    /** Puts Strain back to its starting value, used after the brain gets fried. */
+    public void resetStrain() {
+        strain = Config.getDouble("strain.start");
+    }
+
+    /** True once Strain reaches the fried threshold. Rot does not count. */
     public boolean isFried() {
-        return getTotal() >= maxGauge;
+        return strain >= friedThreshold;
     }
 
     // Small test runner for Week 2
@@ -70,29 +72,27 @@ public class BrainrotGauge {
 
             System.out.println("Start  -> Rot: " + gauge.getRot()
                     + ", Strain: " + gauge.getStrain()
-                    + ", Total: " + gauge.getTotal()
                     + ", Fried: " + gauge.isFried());
 
             // 1. Correct answer reduces strain (50 -> 35)
             gauge.reduceStrain(15);
-            System.out.println("After -15 Strain -> Strain: " + gauge.getStrain()
-                    + ", Total: " + gauge.getTotal());
+            System.out.println("After -15 Strain -> Strain: " + gauge.getStrain());
 
             // 2. Strain cannot go below 0 (35 - 50 -> 0)
             gauge.reduceStrain(50);
-            System.out.println("Floor test (-50) -> Strain: " + gauge.getStrain()
-                    + ", Total: " + gauge.getTotal());
+            System.out.println("Floor test (-50) -> Strain: " + gauge.getStrain());
 
-            // 3. Defeating a concept boss clears Rot (40 - 6 -> 34)
+            // 3. Defeating a concept boss clears Rot (40 - 6 -> 34) and leaves Strain alone
             gauge.clearRot(Config.getInt("rot.concept.boss"));
             System.out.println("Boss defeated    -> Rot: " + gauge.getRot()
-                    + ", Total: " + gauge.getTotal());
+                    + ", Strain: " + gauge.getStrain());
 
-            // 4. Adding large strain caps total at 100 and triggers Fried
-            gauge.addStrain(80);
-            System.out.println("Max cap (+80)    -> Rot: " + gauge.getRot()
-                    + ", Strain: " + gauge.getStrain()
-                    + ", Total: " + gauge.getTotal()
+            // 4. Rot never fries on its own, even with Strain at 0
+            System.out.println("Rot only         -> Fried: " + gauge.isFried());
+
+            // 5. Strain is capped and fries at the threshold
+            gauge.addStrain(150);
+            System.out.println("Max cap (+150)   -> Strain: " + gauge.getStrain()
                     + ", Fried: " + gauge.isFried());
 
         } catch (Exception e) {
