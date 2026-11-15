@@ -1,0 +1,23 @@
+# Extra questions so the placeholder boss covers every challenge type and difficulty.
+ID: TEST-01
+TYPE: FILL_BLANK
+DIFFICULTY: MEDIUM
+PROMPT:
+Which keyword makes a class inherit from another class?
+CODE:
+public class Dog ____ Animal {
+    void bark() { }
+}
+ANSWER: extends
+EXPLANATION: A subclass uses extends to inherit from its parent class.
+HINT: It is a verb, and it is not the keyword used with interfaces.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=HARD
+CODE=try { int[] a = new int[2]; a[5] = 1; }\ncatch (Exception e) { System.out.print("A"); }\nfinally { System.out.print("B"); }\nSystem.out.print("C");
+CHOICE=AC
+CHOICE=ABC
+CHOICE=BC
+CHOICE=Crash with no output
+ANSWER=2
+HINT=finally runs whether or not an exception was caught.

@@ -41,6 +41,16 @@ public class ArrangeCodeChallenge extends Challenge {
     }
 
     @Override
+    protected String getDefaultHint() {
+        return "Work out which line has to come first, then build from there.";
+    }
+
+    @Override
+    public String getInputHint() {
+        return "Type the line numbers in order, like 2 4 1 3";
+    }
+
+    @Override
     public String getTypeLabel() {
         return "Arrange the Code";
     }

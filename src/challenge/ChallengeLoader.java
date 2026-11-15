@@ -85,6 +85,7 @@ public final class ChallengeLoader {
         // Parse modern sectioned format (ID:, TYPE:, DIFFICULTY:, etc.)
         String id = "";
         String type = "";
+        String hint = "";
         Difficulty diff = Difficulty.EASY;
         StringBuilder prompt = new StringBuilder();
         StringBuilder code = new StringBuilder();
@@ -121,6 +122,9 @@ public final class ChallengeLoader {
             } else if (trimmed.startsWith("EXPLANATION:")) {
                 explanation = trimmed.substring(12).trim();
                 currentSection = "";
+            } else if (trimmed.startsWith("HINT:")) {
+                hint = trimmed.substring(5).trim();
+                currentSection = "";
             } else {
                 if ("PROMPT".equals(currentSection)) {
                     prompt.append(trimmed).append("\n");
@@ -134,6 +138,7 @@ public final class ChallengeLoader {
                 type, id, prompt.toString().trim(), code.toString().stripTrailing(), diff, answer, explanation
         );
         if (created != null) {
+            created.setHint(hint);
             challenges.add(created);
         }
     }
@@ -142,6 +147,8 @@ public final class ChallengeLoader {
         String type = null;
         String code = null;
         List<String> choices = new ArrayList<>();
+        Difficulty diff = Difficulty.EASY;
+        String hint = "";
         int answer = -1;
 
         for (String line : lines) {
@@ -157,6 +164,12 @@ public final class ChallengeLoader {
                 case "TYPE" -> type = value;
                 case "CODE" -> code = value.replace("\\n", "\n");
                 case "CHOICE" -> choices.add(value);
+                case "HINT" -> hint = value;
+                case "DIFFICULTY" -> {
+                    try {
+                        diff = Difficulty.valueOf(value.toUpperCase());
+                    } catch (IllegalArgumentException ignored) { }
+                }
                 case "ANSWER" -> {
                     try {
                         answer = Integer.parseInt(value);
@@ -166,7 +179,11 @@ public final class ChallengeLoader {
         }
 
         if ("PREDICT_OUTPUT".equalsIgnoreCase(type) && code != null) {
-            return new PredictOutputChallenge(code, choices, answer > 0 ? answer - 1 : 0);
+            int correctIndex = answer > 0 ? answer - 1 : 0;
+            Challenge created = new PredictOutputChallenge("", "What does this print?", code, diff,
+                    String.valueOf(correctIndex + 1), choices, correctIndex);
+            created.setHint(hint);
+            return created;
         }
         return null;
     }

@@ -38,6 +38,16 @@ public class FillBlankChallenge extends Challenge {
     }
 
     @Override
+    protected String getDefaultHint() {
+        return "Think about which keyword or name completes the statement.";
+    }
+
+    @Override
+    public String getInputHint() {
+        return "Type the missing word";
+    }
+
+    @Override
     public String getTypeLabel() {
         return "Fill in the Blank";
     }
