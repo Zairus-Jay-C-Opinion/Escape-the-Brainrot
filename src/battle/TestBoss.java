@@ -48,6 +48,11 @@ public class TestBoss extends Boss {
     }
 
     @Override
+    public boolean hasPhase2(){
+        return true;
+    }
+
+    @Override
     public String getDefeatLine() {
         return "Placeholder... deleted...";
     }

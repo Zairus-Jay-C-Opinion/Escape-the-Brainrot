@@ -62,7 +62,7 @@ public abstract class Boss {
     }
 
     private void checkPhaseTransition() {
-        if (!isDefeated() && currentPhase == Phase.NORMAL && currentHp <= maxHp / 2) {
+        if (!isDefeated() && hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
             currentPhase = Phase.ENRAGED;
             onPhaseChange(currentPhase);
         }
@@ -82,6 +82,16 @@ public abstract class Boss {
     public void onPhaseChange(Phase newPhase) { }
 
     public abstract void onDefeat();
+
+    /** Whether this boss enters Phase 2 at low HP. Early bosses stay in Phase 1. */
+    public boolean hasPhase2(){
+        return false;
+    }
+
+    /** HP at or below which Phase 2 begins (equal to the number of Phase 2 questions). */
+    public int getPhase2Hp(){
+        return maxHp / 2;
+    }
 
     /** The OOP concept this boss tests, shown on the code terminal. */
     public String getConcept() {
