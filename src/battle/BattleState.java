@@ -519,7 +519,7 @@ public class BattleState extends GameState {
 
         backdrop.draw(g);
         bossView.draw(g, BOSS_AREA_X, BOSS_AREA_Y, BOSS_AREA_WIDTH, BOSS_AREA_HEIGHT);
-        if (current != null) {
+        if (current != null && stage != Stage.INTRO) {
             codeBox.draw(g);
             if (current.getAnswerInput() == AnswerInput.CHOICE) {
                 choiceBox.draw(g);
