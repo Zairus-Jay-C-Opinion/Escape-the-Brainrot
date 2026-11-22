@@ -2,7 +2,7 @@ package engine;
 
 import battle.BattleState;
 import battle.Boss;
-import battle.TestBoss;
+import battle.ChimpanziniBananini;
 import engine.InputHandler.Action;
 import entity.Player;
 import exception.LevelLoadException;
@@ -36,7 +36,7 @@ public class OverworldState extends GameState {
         for (int row = 0; row < map.getHeight(); row++) {
             for (int column = 0; column < map.getWidth(); column++) {
                 if (map.getTile(column, row) == TileMap.BOSS_TRIGGER) {
-                    bosses.put(row * map.getWidth() + column, new TestBoss());
+                    bosses.put(row * map.getWidth() + column, createBossForTile(column, row));
                 }
             }
         }
@@ -80,6 +80,10 @@ public class OverworldState extends GameState {
     // Which boss lives on a tile. Every boss tile is the placeholder for now; later this reads from the map data.
     private Boss bossAt(int column, int row) {
         return bosses.get(row * map.getWidth() + column);
+    }
+
+    private Boss createBossForTile(int column, int row){
+        return new ChimpanziniBananini();
     }
 
     // The battle only changes the Boss object, so the map is updated here once the player is back.
