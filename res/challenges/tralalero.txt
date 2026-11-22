@@ -1,0 +1,90 @@
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=EASY
+CODE=class Fish {\n    void move() { System.out.println("swim"); }\n}\nclass Shark extends Fish {\n    void move() { System.out.println("bite"); }\n    public static void main(String[] a) {\n        Fish f = new Shark(); f.move();\n    }\n}
+CHOICE=swim
+CHOICE=bite
+CHOICE=Compile error
+CHOICE=Nothing
+ANSWER=2
+HINT=Java calls the overridden method of the actual object (Shark), not the variable type.
+---
+ID: TRAL-02
+TYPE: ARRANGE
+DIFFICULTY: EASY
+PROMPT:
+Arrange the lines to override swim() in Shark (e.g. 1,2,3,4):
+CODE:
+1:     @Override
+2: class Shark extends Fish {
+3:     void swim() { System.out.println("fast"); }
+4: }
+ANSWER: 2,1,3,4
+HINT: Start with the class declaration, then @Override right above the method.
+---
+ID: TRAL-03
+TYPE: SPOT_BUG
+DIFFICULTY: EASY
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: class Animal {
+2:     void speak() { }
+3: }
+4: class Dog extends Animal {
+5:     @Override
+6:     void speek() { }
+7: }
+ANSWER: 6
+EXPLANATION: Line 6 misspells speak() as speek(), so @Override fails to compile.
+HINT: Look closely at the method name under @Override.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=MEDIUM
+CODE=class A {\n    int val() { return 1; }\n}\nclass B extends A {\n    int val() { return 2; }\n    public static void main(String[] a) {\n        A obj = new B();\n        System.out.println(obj.val() + 3);\n    }\n}
+CHOICE=3
+CHOICE=4
+CHOICE=5
+CHOICE=Compile error
+ANSWER=3
+HINT=obj holds a B object, so obj.val() runs B's version before adding 3.
+---
+ID: TRAL-05
+TYPE: SPOT_BUG
+DIFFICULTY: HARD
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: class Parent {
+2:     public void show() { }
+3: }
+4: class Child extends Parent {
+5:     @Override
+6:     private void show() { }
+7: }
+ANSWER: 6
+EXPLANATION: Line 6 tries to reduce visibility from public to private when overriding.
+HINT: An overriding method cannot be more restrictive than the parent method.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=HARD
+CODE=class Base {\n    String tag() { return "A"; }\n}\nclass Sub extends Base {\n    String tag() { return super.tag() + "B"; }\n    public static void main(String[] a) {\n        Base x = new Sub();\n        System.out.println(x.tag());\n    }\n}
+CHOICE=A
+CHOICE=B
+CHOICE=AB
+CHOICE=BA
+ANSWER=3
+HINT=super.tag() calls Base's version first, then "B" is appended.
+---
+ID: TRAL-07
+TYPE: ARRANGE
+DIFFICULTY: HARD
+PROMPT:
+Arrange the lines to loop polymorphically over a Fish array (e.g. 1,2,3,4,5):
+CODE:
+1:     for (Fish f : tank) {
+2:         f.swim();
+3:     }
+4: public static void race(Fish[] tank) {
+5: }
+ANSWER: 4,1,2,3,5
+HINT: Method header first, then the for-each loop and its closing brace.

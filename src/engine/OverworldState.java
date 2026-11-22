@@ -3,6 +3,7 @@ package engine;
 import battle.BattleState;
 import battle.Boss;
 import battle.ChimpanziniBananini;
+import battle.TralaleroTralala;
 import engine.InputHandler.Action;
 import entity.Player;
 import exception.LevelLoadException;
@@ -83,6 +84,9 @@ public class OverworldState extends GameState {
     }
 
     private Boss createBossForTile(int column, int row){
+        if (column == 14 && row == 1){
+            return new TralaleroTralala();
+        }
         return new ChimpanziniBananini();
     }
 
