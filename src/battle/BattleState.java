@@ -165,7 +165,7 @@ public class BattleState extends GameState {
     // ---------------------------------------------------------------- questions
 
     private void loadNextQuestion() {
-        current = deck.draw();
+        current = deck.draw(boss.getCurrentPhase());
         typed = "";
         // Anything said about the previous question must not sit under the new one.
         dialogue.show("");
