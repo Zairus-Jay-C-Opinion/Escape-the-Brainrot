@@ -21,11 +21,13 @@ public class TileMap {
     public static final int WALL = 1;          // solid
     public static final int BOSS_TRIGGER = 2;  // stepping here starts a battle
     public static final int DEFEATED_BOSS = 3; // a beaten boss's tile: walkable and never triggers again
+    public static final int PORTAL = 4;        // appears after defeating a boss to return to the TV wall
 
     private static final Color FLOOR_COLOR = new Color(40, 40, 52);
     private static final Color WALL_COLOR = Color.GRAY;
     private static final Color BOSS_COLOR = Color.RED;
     private static final Color DEFEATED_COLOR = new Color(58, 44, 66);
+    private static final Color PORTAL_COLOR = new Color(80, 210, 255);
 
     private final int[][] tiles; // indexed [row][column]
 
@@ -67,7 +69,7 @@ public class TileMap {
             } catch (NumberFormatException e) {
                 throw new LevelLoadException("Bad tile '" + parts[i].trim() + "' on map line " + lineNumber, e);
             }
-            if (row[i] < FLOOR || row[i] > DEFEATED_BOSS) {
+            if (row[i] < FLOOR || row[i] > PORTAL) {
                 throw new LevelLoadException("Unknown tile " + row[i] + " on map line " + lineNumber);
             }
         }
@@ -112,6 +114,13 @@ public class TileMap {
                     g.setColor(new Color(120, 96, 140));
                     g.drawLine(column * size + 12, row * size + 12, column * size + size - 12, row * size + size - 12);
                     g.drawLine(column * size + size - 12, row * size + 12, column * size + 12, row * size + size - 12);
+                } else if (tiles[row][column] == PORTAL) {
+                    g.setColor(new Color(20, 40, 70));
+                    g.fillRect(column * size, row * size, size, size);
+                    g.setColor(PORTAL_COLOR);
+                    g.drawOval(column * size + 6, row * size + 6, size - 12, size - 12);
+                    g.setColor(new Color(180, 245, 255));
+                    g.fillOval(column * size + 14, row * size + 14, size - 28, size - 28);
                 }
             }
         }
