@@ -62,7 +62,13 @@ public abstract class Boss {
     }
 
     private void checkPhaseTransition() {
-        if (!isDefeated() && hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
+        if (isDefeated()) {
+            return;
+        }
+        if (hasPhase3() && currentPhase != Phase.FINAL && currentHp <= getPhase3Hp()) {
+            currentPhase = Phase.FINAL;
+            onPhaseChange(currentPhase);
+        } else if (hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
             currentPhase = Phase.ENRAGED;
             onPhaseChange(currentPhase);
         }
@@ -93,6 +99,16 @@ public abstract class Boss {
         return maxHp / 2;
     }
 
+    /** Whether this boss enters Phase 3 at critical HP. */
+    public boolean hasPhase3() {
+        return false;
+    }
+
+    /** HP at or below which Phase 3 begins (equal to the number of Phase 3 questions). */
+    public int getPhase3Hp() {
+        return maxHp / 3;
+    }
+
     /** The OOP concept this boss tests, shown on the code terminal. */
     public String getConcept() {
         return "Java OOP";
@@ -104,7 +120,24 @@ public abstract class Boss {
     }
 
     public String getPhase2SpritePath() {
-    return null;
+        return null;
+    }
+
+    public String getPhase3SpritePath() {
+        return null;
+    }
+
+    public String getPhaseSpritePath(Phase phase) {
+        return switch (phase) {
+            case NORMAL -> getSpritePath();
+            case ENRAGED -> getPhase2SpritePath();
+            case FINAL -> getPhase3SpritePath();
+        };
+    }
+
+    /** Optional challenge file used exclusively for the final HP point (e.g., 67's climax question). */
+    public String getClimaxChallengeFile() {
+        return null;
     }
 
     /** Classpath paths of the challenge files this boss draws its questions from. */
@@ -128,6 +161,18 @@ public abstract class Boss {
         return "You have made me angry.";
     }
 
+    public String getPhase3Line() {
+        return "This is my final form!";
+    }
+
+    public String getPhaseLine(Phase phase) {
+        return switch (phase) {
+            case NORMAL -> getIntroLine();
+            case ENRAGED -> getPhase2Line();
+            case FINAL -> getPhase3Line();
+        };
+    }
+
     public String getDefeatLine() {
         return "Impossible...";
     }
@@ -140,7 +185,15 @@ public abstract class Boss {
         return PhaseStyle.ENRAGED;
     }
 
+    public PhaseStyle getPhase3Style() {
+        return PhaseStyle.FINAL;
+    }
+
     public PhaseStyle getStyle(Phase phase) {
-        return phase == Phase.NORMAL ? getPhase1Style() : getPhase2Style();
+        return switch (phase) {
+            case NORMAL -> getPhase1Style();
+            case ENRAGED -> getPhase2Style();
+            case FINAL -> getPhase3Style();
+        };
     }
 }

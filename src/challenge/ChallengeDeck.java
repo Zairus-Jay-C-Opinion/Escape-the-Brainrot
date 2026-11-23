@@ -32,7 +32,7 @@ public class ChallengeDeck {
     /** The next challenge. Only call when the deck is not empty. */
     public Challenge draw(Phase phase) {
         refillIfNeeded();
-        Difficulty firstChoice = phase == Phase.ENRAGED ? Difficulty.HARD : Difficulty.EASY;
+        Difficulty firstChoice = phase == Phase.NORMAL ? Difficulty.EASY : Difficulty.HARD;
         Challenge picked = takeDifficulty(firstChoice);
 
         if (picked == null){

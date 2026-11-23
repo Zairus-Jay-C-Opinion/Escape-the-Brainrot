@@ -1,0 +1,120 @@
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=EASY
+CODE=class Mind {\n    private int focus = 67;\n    public int getFocus() { return focus; }\n}\npublic class Main {\n    public static void main(String[] a) {\n        Mind m = new Mind();\n        System.out.println(m.getFocus() - 7);\n    }\n}
+CHOICE=67
+CHOICE=60
+CHOICE=7
+CHOICE=Compile error
+ANSWER=2
+HINT=Encapsulation: getFocus() returns 67, then 7 is subtracted.
+---
+ID: 67-02
+TYPE: FILL_BLANK
+DIFFICULTY: EASY
+PROMPT:
+Polymorphism + Inheritance: Which keyword invokes the parent class constructor?
+CODE:
+class Signal {
+    Signal(int hz) { }
+}
+class Brainrot extends Signal {
+    Brainrot() { _____(67); }
+}
+ANSWER: super
+EXPLANATION: super(67) calls the parent Signal constructor.
+HINT: It refers to the superclass.
+---
+ID: 67-03
+TYPE: SPOT_BUG
+DIFFICULTY: MEDIUM
+PROMPT:
+Encapsulation: Which line number breaks compilation?
+CODE:
+1: class Lock {
+2:     private int pin = 67;
+3: }
+4: public class Main {
+5:     public static void main(String[] a) {
+6:         Lock l = new Lock();
+7:         System.out.println(l.pin);
+8:     }
+9: }
+ANSWER: 7
+EXPLANATION: Line 7 accesses private field 'pin' directly from outside Lock.
+HINT: Check the access modifier on pin.
+---
+ID: 67-04
+TYPE: ARRANGE
+DIFFICULTY: MEDIUM
+PROMPT:
+Abstraction: Arrange the lines to implement the Feed interface:
+CODE:
+1:     public void scroll() { System.out.println("67"); }
+2: class DoomScroll implements Feed {
+3: }
+4:     @Override
+ANSWER: 2,4,1,3
+HINT: Class declaration first, then @Override above the implemented method.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=HARD
+CODE=class Node {\n    int v() { return 6; }\n}\nclass Glitch extends Node {\n    int v() { return 7; }\n    public static void main(String[] a) {\n        Node n = new Glitch();\n        System.out.println(n.v() * 10 + 7);\n    }\n}
+CHOICE=67
+CHOICE=77
+CHOICE=70
+CHOICE=Compile error
+ANSWER=2
+HINT=Polymorphism: n holds a Glitch object, so n.v() returns 7.
+---
+ID: 67-06
+TYPE: SPOT_BUG
+DIFFICULTY: HARD
+PROMPT:
+Abstraction + Inheritance: Which line number has a compile error?
+CODE:
+1: abstract class Core {
+2:     abstract int pulse();
+3: }
+4: class StaticCore extends Core {
+5:     int pulse(int x) { return x; }
+6: }
+ANSWER: 4
+EXPLANATION: StaticCore overloads pulse(int) instead of overriding no-arg pulse(), leaving an abstract method unimplemented.
+HINT: Does pulse(int x) have the exact same signature as abstract int pulse()?
+---
+ID: 67-07
+TYPE: FILL_BLANK
+DIFFICULTY: HARD
+PROMPT:
+Abstraction: Which keyword stops a method from being overridden in any subclass?
+CODE:
+class Guard {
+    public _____ void protect() { }
+}
+ANSWER: final
+EXPLANATION: Marking a method 'final' prevents subclasses from overriding it.
+HINT: It is the same keyword used to make a constant variable.
+---
+ID: 67-08
+TYPE: ARRANGE
+DIFFICULTY: HARD
+PROMPT:
+All 4 Pillars: Arrange the lines for a polymorphic abstract-class override:
+CODE:
+1:     @Override
+2: class Rebel extends Feed {
+3:     void play() { System.out.println("free"); }
+4: }
+5:     Rebel() { super(); }
+ANSWER: 2,5,1,3,4
+HINT: Class header, constructor calling super(), @Override method, then closing brace.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=HARD
+CODE=class A { String id() { return "6"; } }\nclass B extends A {\n    String id() { return super.id() + "7"; }\n    public static void main(String[] a) {\n        A x = new B();\n        System.out.println(x.id());\n    }\n}
+CHOICE=6
+CHOICE=7
+CHOICE=67
+CHOICE=76
+ANSWER=3
+HINT=super.id() returns "6", and B appends "7".

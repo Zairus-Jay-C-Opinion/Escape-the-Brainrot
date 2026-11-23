@@ -1,7 +1,9 @@
 package engine;
 
 import battle.Boss;
+import battle.Boss67;
 import battle.ChimpanziniBananini;
+import battle.LiriliLarila;
 import battle.TralaleroTralala;
 import engine.InputHandler.Action;
 import exception.AssetLoadException;
@@ -73,9 +75,9 @@ public class WorldMapState extends GameState {
         channels.add(new Channel("CHIMPANZINI BANANINI", new ChimpanziniBananini(), new Rectangle(164, 116, 96, 80), -1, false));
         channels.add(new Channel("BOMBARDIRO CROCODILO", null, new Rectangle(514, 104, 130, 96), 0, false));
         channels.add(new Channel("TRALALERO TRALALA", new TralaleroTralala(), new Rectangle(16, 336, 112, 88), 0, false));
-        channels.add(new Channel("LIRILI LARILA", null, new Rectangle(180, 344, 104, 82), 2, false));
+        channels.add(new Channel("LIRILI LARILA", new LiriliLarila(), new Rectangle(180, 344, 104, 82), 2, false));
         channels.add(new Channel("TUNG TUNG TUNG SAHUR", null, new Rectangle(508, 324, 132, 102), 3, false));
-        channels.add(new Channel("67", null, new Rectangle(298, 38, 170, 134), 4, true));
+        channels.add(new Channel("67", new Boss67(), new Rectangle(298, 38, 170, 134), 4, true));
 
         for (Channel c : channels) {
             if (c.boss != null) {
