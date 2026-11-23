@@ -66,6 +66,11 @@ public class TralaleroTralala extends Boss {
     }
 
     @Override
+    public String getPhase2SpritePath(){
+        return "/sprites/bosses/tralalero_tralala_phase2.png";
+    }
+
+    @Override
     public void onDefeat() { }
 
 }

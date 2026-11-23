@@ -26,8 +26,8 @@ public class BossView {
     private static final int STRIPS = 16;
     private static final float TINT_ALPHA = 0.3f;
 
-    private final BufferedImage sprite;
-    private final BufferedImage whiteSprite;
+    private BufferedImage sprite;
+    private BufferedImage whiteSprite;
     private BufferedImage tintSprite;
     private int tick;
     private int hitTicks;
@@ -87,6 +87,11 @@ public class BossView {
             }
         }
         return copy;
+    }
+
+    public void setSprite(String spritePath){
+        sprite = load(spritePath);
+        whiteSprite = solidCopy(sprite, Color.WHITE);
     }
 
     public void hit() {

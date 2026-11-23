@@ -103,6 +103,10 @@ public abstract class Boss {
         return "/sprites/bosses/missing.png";
     }
 
+    public String getPhase2SpritePath() {
+    return null;
+    }
+
     /** Classpath paths of the challenge files this boss draws its questions from. */
     public List<String> getChallengeFiles() {
         return List.of("/challenges/sample.txt");
