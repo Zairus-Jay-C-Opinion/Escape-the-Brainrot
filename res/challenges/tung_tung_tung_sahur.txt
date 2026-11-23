@@ -1,0 +1,140 @@
+# res/challenges/tung_tung_tung_sahur.txt
+# All 4 OOP Pillars (Encapsulation, Inheritance, Polymorphism, Abstraction)
+# Boss #5: Tung Tung Tung Sahur
+
+ID: TTS-01
+TYPE: PREDICT
+DIFFICULTY: EASY
+PROMPT:
+[Encapsulation] What does this code print?
+CODE:
+class Log {
+    private int ringCount = 10;
+    public int getRings() { return ringCount; }
+}
+public class Main {
+    public static void main(String[] args) {
+        Log l = new Log();
+        System.out.println(l.getRings() + 5);
+    }
+}
+ANSWER: 15
+HINT: The private field is safely accessed via getRings() and then added to 5.
+---
+ID: TTS-02
+TYPE: FILL_BLANK
+DIFFICULTY: EASY
+PROMPT:
+[Inheritance] You want class WoodenBat to inherit from Weapon. Fill in the blank with the inheritance keyword.
+CODE:
+class Weapon {}
+
+class WoodenBat ___ Weapon {
+    int damage = 20;
+}
+ANSWER: extends
+HINT: In Java, the extends keyword establishes an IS-A inheritance relationship between classes.
+---
+ID: TTS-03
+TYPE: PREDICT
+DIFFICULTY: MEDIUM
+PROMPT:
+[Polymorphism] Dynamic method dispatch. What prints to standard output?
+CODE:
+class Monster {
+    void roar() { System.out.print("Roar "); }
+}
+class Sahur extends Monster {
+    void roar() { System.out.print("Tung "); }
+}
+public class Main {
+    public static void main(String[] args) {
+        Monster m = new Sahur();
+        m.roar();
+        System.out.print("Tung!");
+    }
+}
+ANSWER: Tung Tung!
+HINT: At runtime, Java executes the overridden method in Sahur because the actual object is an instance of Sahur.
+---
+ID: TTS-04
+TYPE: SPOT_BUG
+DIFFICULTY: MEDIUM
+PROMPT:
+[Abstraction] Identify the line number containing a compilation error.
+CODE:
+1: abstract class WoodCore {
+2:     abstract void splinter();
+3: }
+4: public class Main {
+5:     public static void main(String[] args) {
+6:         WoodCore core = new WoodCore();
+7:     }
+8: }
+ANSWER: 6
+EXPLANATION: Line 6 attempts to instantiate an abstract class 'new WoodCore()', which cannot be instantiated directly.
+HINT: Abstract classes define contracts and cannot be directly created using 'new'.
+---
+ID: TTS-05
+TYPE: ARRANGE
+DIFFICULTY: MEDIUM
+PROMPT:
+[Inheritance & Constructors] Arrange the lines in the correct order to define an overriding method that calls super.
+CODE:
+1:         super.strike();
+2: class PowerBat extends Weapon {
+3:     void strike() {
+4:         System.out.println("CRACK!");
+5:     }
+6: }
+ANSWER: 2,3,1,4,5,6
+HINT: Declare the class, define the strike() method, invoke super.strike(), print the message, and close the braces.
+---
+ID: TTS-06
+TYPE: PREDICT
+DIFFICULTY: HARD
+PROMPT:
+[All 4 Pillars Synthesis] Polymorphism with constructors and abstract classes. What does this program print?
+CODE:
+abstract class Entity {
+    Entity() { System.out.print("Tung"); }
+    abstract void hit();
+}
+class Trunk extends Entity {
+    Trunk() { System.out.print("-Tung"); }
+    void hit() { System.out.print("-Sahur!"); }
+}
+public class Main {
+    public static void main(String[] args) {
+        Entity e = new Trunk();
+        e.hit();
+    }
+}
+ANSWER: Tung-Tung-Sahur!
+HINT: Object construction calls the superclass constructor first, followed by the subclass constructor, then the overridden method.
+---
+ID: TTS-07
+TYPE: PREDICT
+DIFFICULTY: HARD
+PROMPT:
+[Polymorphism & Static Hiding] What is printed to standard output?
+CODE:
+class Bark {
+    static void crack() { System.out.print("B"); }
+    void splinter() { System.out.print("1"); }
+}
+class Oak extends Bark {
+    static void crack() { System.out.print("O"); }
+    void splinter() { System.out.print("2"); }
+}
+public class Main {
+    public static void main(String[] args) {
+        Bark b = new Oak();
+        b.crack();
+        b.splinter();
+    }
+}
+ANSWER: B2
+HINT: Static methods are hidden (bound at compile time to reference type Bark), while instance methods are overridden (polymorphic at runtime).
+---
+
