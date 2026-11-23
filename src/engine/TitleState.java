@@ -278,15 +278,8 @@ public class TitleState extends GameState {
     }
 
     private void startOverworld() {
-        try {
-            OverworldState next = new OverworldState(manager);
-            rainSound.close();
-            manager.setState(next);
-        } catch (LevelLoadException e) {
-            errorMessage = e.getMessage();
-            fading = false;
-            fadeTicks = 0;
-        }
+        rainSound.close();
+        manager.setState(new WorldMapState(manager));
     }
 
     @Override

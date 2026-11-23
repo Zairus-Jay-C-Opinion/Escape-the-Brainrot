@@ -24,24 +24,37 @@ public class OverworldState extends GameState {
     private final TileMap map;
     private final Player player;
     private final Hud hud;
+    private final GameState worldMap;
+    private final Boss levelBoss;
+    private final List<Boss> hudBosses;
     // One Boss object per boss tile, kept for the whole session so a defeated boss stays defeated.
     private final Map<Integer, Boss> bosses = new TreeMap<>();
     private static final Color HUD_BACKGROUND = new Color(12, 12, 20);
     private static final Font HINT_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
     public OverworldState(StateManager manager) throws LevelLoadException {
+        this(manager, null, "/maps/test-map.csv", null, List.of());
+    }
+
+    public OverworldState(StateManager manager, GameState worldMap, String mapPath,
+                          Boss levelBoss, List<Boss> allBosses) throws LevelLoadException {
         super(manager);
-        map = new TileMap("/maps/test-map.csv");
+        this.worldMap = worldMap;
+        this.levelBoss = levelBoss;
+        map = new TileMap(mapPath);
         player = new Player(1, 1); // start tile (column 1, row 1)
         // Created up front so the HUD can show a Rot segment for every boss on the map.
         for (int row = 0; row < map.getHeight(); row++) {
             for (int column = 0; column < map.getWidth(); column++) {
                 if (map.getTile(column, row) == TileMap.BOSS_TRIGGER) {
-                    bosses.put(row * map.getWidth() + column, createBossForTile(column, row));
+                    bosses.put(row * map.getWidth() + column,
+                            levelBoss != null ? levelBoss : createBossForTile(column, row));
                 }
             }
         }
-        hud = new Hud(manager.getGauge(), new ArrayList<>(bosses.values()));
+        this.hudBosses = (allBosses != null && !allBosses.isEmpty())
+                ? allBosses : new ArrayList<>(bosses.values());
+        hud = new Hud(manager.getGauge(), hudBosses);
     }
 
     @Override
@@ -69,12 +82,15 @@ public class OverworldState extends GameState {
         }
 
         boolean justArrived = player.update();
-        if (justArrived && map.getTile(player.getTileX(), player.getTileY()) == TileMap.BOSS_TRIGGER) {
+        int tile = map.getTile(player.getTileX(), player.getTileY());
+        if (justArrived && tile == TileMap.BOSS_TRIGGER) {
             Boss boss = bossAt(player.getTileX(), player.getTileY());
             if (!boss.isDefeated()) {
                 // Pass "this" so the battle can hand control back to the same overworld afterwards.
-                manager.setState(new BattleState(manager, this, boss, manager.getGauge(), new ArrayList<>(bosses.values())));
+                manager.setState(new BattleState(manager, this, boss, manager.getGauge(), hudBosses));
             }
+        } else if (justArrived && tile == TileMap.PORTAL && worldMap != null) {
+            manager.setState(worldMap);
         }
     }
 
@@ -97,6 +113,9 @@ public class OverworldState extends GameState {
             int row = entry.getKey() / map.getWidth();
             if (entry.getValue().isDefeated() && map.getTile(column, row) == TileMap.BOSS_TRIGGER) {
                 map.setTile(column, row, TileMap.DEFEATED_BOSS);
+                if (worldMap != null && row > 0 && map.getTile(column, row - 1) == TileMap.FLOOR) {
+                    map.setTile(column, row - 1, TileMap.PORTAL);
+                }
             }
         }
     }
@@ -125,7 +144,9 @@ public class OverworldState extends GameState {
         // Sits in the HUD strip between the gauge and the item slots, so the map never covers it.
         g.setColor(Color.WHITE);
         g.setFont(HINT_FONT);
-        String hint = "Arrows / WASD to move. Step on the red tile.";
+        String hint = (worldMap != null && levelBoss != null && levelBoss.isDefeated())
+                ? "A portal opened! Step into it to return."
+                : "Arrows / WASD to move. Step on the red tile.";
         g.drawString(hint, 447 - g.getFontMetrics().stringWidth(hint) / 2, 46);
     }
 }
