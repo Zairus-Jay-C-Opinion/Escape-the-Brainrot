@@ -1,0 +1,49 @@
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=EASY
+CODE=class Banana {\n    private int count = 5;\n    public int getCount() { return count; }\n}\npublic class Main {\n    public static void main(String[] args) {\n        Banana b = new Banana();\n        System.out.println(b.getCount());\n    }\n}
+CHOICE=0
+CHOICE=5
+CHOICE=count
+CHOICE=Compile error
+ANSWER=2
+HINT=The getter simply returns the initial value of count.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=EASY
+CODE=class Vault {\n    private int coins = 10;\n    public void setCoins(int c) { coins = c; }\n    public int getCoins() { return coins; }\n}\npublic class Main {\n    public static void main(String[] args) {\n        Vault v = new Vault();\n        v.setCoins(25);\n        System.out.println(v.getCoins());\n    }\n}
+CHOICE=10
+CHOICE=15
+CHOICE=25
+CHOICE=35
+ANSWER=3
+HINT=setCoins replaces the old value of coins before getCoins is called.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=EASY
+CODE=public class Shield {\n    private int hp = 50;\n    public void setHp(int h) {\n        if (h >= 0) hp = h;\n    }\n    public static void main(String[] a) {\n        Shield s = new Shield();\n        s.setHp(-20);\n        System.out.println(s.hp);\n    }\n}
+CHOICE=-20
+CHOICE=0
+CHOICE=30
+CHOICE=50
+ANSWER=4
+HINT=Check whether -20 passes the if condition inside setHp.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=MEDIUM
+CODE=public class Meter {\n    private int lv = 10;\n    public void add(int n) {\n        lv = Math.min(100, lv + n);\n    }\n    public static void main(String[] a) {\n        Meter m = new Meter();\n        m.add(60); m.add(50);\n        System.out.println(m.lv);\n    }\n}
+CHOICE=100
+CHOICE=110
+CHOICE=120
+CHOICE=60
+ANSWER=1
+HINT=Math.min caps lv at 100 after each add call.
+---
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=MEDIUM
+CODE=public class Account {\n    private int bal = 100;\n    public void take(int n) {\n        if (n <= bal) bal -= n;\n    }\n    public static void main(String[] a) {\n        Account a1 = new Account();\n        a1.take(150); a1.take(40);\n        System.out.println(a1.bal);\n    }\n}
+CHOICE=-90
+CHOICE=60
+CHOICE=100
+CHOICE=-50
+ANSWER=2
+HINT=150 is larger than bal, so only take(40) changes bal.

@@ -8,11 +8,11 @@ import java.awt.Graphics2D;
 public class BossHeader {
 
     private static final Font NAME_FONT = new Font(Font.MONOSPACED, Font.BOLD, 20);
-    private static final int CENTER_X = 384;
-    private static final int MAX_NAME_WIDTH = 370;
-    private static final int BAR_X = 276;
+    private static final int CENTER_X = 450;
+    private static final int MAX_NAME_WIDTH = 340;
+    private static final int BAR_X = 345;
     private static final int BAR_Y = 34;
-    private static final int BAR_WIDTH = 230;
+    private static final int BAR_WIDTH = 210;
     private static final int BAR_HEIGHT = 12;
     private static final double EASE = 0.12;
 

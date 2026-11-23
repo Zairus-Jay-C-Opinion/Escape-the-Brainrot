@@ -165,7 +165,7 @@ public class BattleState extends GameState {
     // ---------------------------------------------------------------- questions
 
     private void loadNextQuestion() {
-        current = deck.draw();
+        current = deck.draw(boss.getCurrentPhase());
         typed = "";
         // Anything said about the previous question must not sit under the new one.
         dialogue.show("");
@@ -461,6 +461,13 @@ public class BattleState extends GameState {
             PhaseStyle style = boss.getStyle(boss.getCurrentPhase());
             vhs.glitch(40, 0.8f);
             bossView.glitchBurst();
+
+            String phase2Sprite = boss.getPhase2SpritePath();
+
+            if (phase2Sprite != null){
+                bossView.setSprite(phase2Sprite);
+            }
+
             bossView.setEnraged(style.accent());
             slam.start(boss.getCurrentPhase().getLabel(), style.accent());
             backdrop.setStyle(style);
@@ -518,8 +525,15 @@ public class BattleState extends GameState {
         }
 
         backdrop.draw(g);
-        bossView.draw(g, BOSS_AREA_X, BOSS_AREA_Y, BOSS_AREA_WIDTH, BOSS_AREA_HEIGHT);
-        if (current != null) {
+
+        if (stage == Stage.PHASE_CHANGE){
+            bossView.draw(g, 164, 76, 440, 356);
+        }
+        else{
+            bossView.draw(g, BOSS_AREA_X, BOSS_AREA_Y, BOSS_AREA_WIDTH, BOSS_AREA_HEIGHT);
+        }
+        
+        if (current != null && stage != Stage.INTRO && stage != Stage.PHASE_CHANGE) {
             codeBox.draw(g);
             if (current.getAnswerInput() == AnswerInput.CHOICE) {
                 choiceBox.draw(g);

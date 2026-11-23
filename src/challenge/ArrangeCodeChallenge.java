@@ -47,7 +47,7 @@ public class ArrangeCodeChallenge extends Challenge {
 
     @Override
     public String getInputHint() {
-        return "Type the line numbers in order, like 2 4 1 3";
+        return "Type the line numbers in order, like 1 2 3 4";
     }
 
     @Override
