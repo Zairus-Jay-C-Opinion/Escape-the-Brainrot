@@ -1,0 +1,97 @@
+# res/challenges/bombardiro.txt
+# Inheritance OOP Challenges - Bombardiro Crocodilo Boss Fights
+
+ID: INH-01
+TYPE: FILL_BLANK
+DIFFICULTY: EASY
+PROMPT:
+Scenario: To create a class hierarchy, you want Class Airplane to inherit from Vehicle. 
+What keyword belongs in the blank?
+CODE:
+class Vehicle {}
+
+class Airplane ___ Vehicle {
+    int wings = 2;
+}
+ANSWER: extends
+HINT: Look for the Java keyword used to declare a class as a subclass of another.
+---
+ID: INH-02
+TYPE: PREDICT
+DIFFICULTY: EASY
+PROMPT:
+What does this program print to standard output?
+CODE:
+class Plane {
+    void fly() { System.out.print("Vroom"); }
+}
+class Bomber extends Plane {
+    void fly() { 
+        super.fly(); 
+        System.out.print(" Boom!"); 
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Bomber b = new Bomber();
+        b.fly();
+    }
+}
+ANSWER: Vroom Boom!
+HINT: Remember that calling super.fly() runs the method from the parent class first.
+---
+ID: INH-03
+TYPE: SPOT_BUG
+DIFFICULTY: MEDIUM
+PROMPT:
+Identify the line number containing a compilation error.
+CODE:
+1: class Bird {
+2:     final void fly() {}
+3: }
+4: class CrocBird extends Bird {
+5:     void fly() {}
+6: }
+ANSWER: 5
+HINT: Final methods cannot be overridden by subclasses. Compare lines 2 and 5.
+---
+ID: INH-04
+TYPE: ARRANGE
+DIFFICULTY: MEDIUM
+PROMPT:
+Enter the line numbers in the correct sequence (e.g. 1,2,3,4) to call a parent constructor from a subclass.
+CODE:
+1:         super();
+2: class Fighter extends Airplane {
+3:     Fighter() {
+4:     }
+ANSWER: 2,3,1,4
+HINT: The super() call must be the very first statement inside the constructor's braces.
+---
+ID: INH-05
+TYPE: PREDICT
+DIFFICULTY: HARD
+PROMPT:
+What will this code print to the screen? Use careful tracking of polymorphism!
+CODE:
+class Creature {
+    Creature() { System.out.print("C"); }
+    void attack() { System.out.print(" Strike"); }
+}
+class Croc extends Creature {
+    Croc() { System.out.print("R"); }
+    void attack() { 
+        super.attack(); 
+        System.out.print(" Bite!"); 
+    }
+}
+public class Main {
+    public static void main(String[] args) {
+        Creature target = new Croc();
+        target.attack();
+    }
+}
+ANSWER: CR Strike Bite!
+HINT: Creation of an object prints from the superclass constructor first, followed by the subclass constructor. Then analyze the method calls.
+---
+

@@ -62,7 +62,10 @@ public abstract class Boss {
     }
 
     private void checkPhaseTransition() {
-        if (!isDefeated() && hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
+        if (!isDefeated() && hasPhase3() && currentPhase == Phase.ENRAGED && currentHp <= getPhase3Hp()) {
+            currentPhase = Phase.OVERDRIVE;
+            onPhaseChange(currentPhase);
+        } else if (!isDefeated() && hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
             currentPhase = Phase.ENRAGED;
             onPhaseChange(currentPhase);
         }
@@ -84,13 +87,23 @@ public abstract class Boss {
     public abstract void onDefeat();
 
     /** Whether this boss enters Phase 2 at low HP. Early bosses stay in Phase 1. */
-    public boolean hasPhase2(){
+    public boolean hasPhase2() {
         return false;
     }
 
     /** HP at or below which Phase 2 begins (equal to the number of Phase 2 questions). */
-    public int getPhase2Hp(){
+    public int getPhase2Hp() {
         return maxHp / 2;
+    }
+
+    /** Whether this boss enters Phase 3 (Overdrive / Final phase). */
+    public boolean hasPhase3() {
+        return false;
+    }
+
+    /** HP at or below which Phase 3 begins. */
+    public int getPhase3Hp() {
+        return 1;
     }
 
     /** The OOP concept this boss tests, shown on the code terminal. */
@@ -104,7 +117,11 @@ public abstract class Boss {
     }
 
     public String getPhase2SpritePath() {
-    return null;
+        return null;
+    }
+
+    public String getPhase3SpritePath() {
+        return null;
     }
 
     /** Classpath paths of the challenge files this boss draws its questions from. */
@@ -128,6 +145,10 @@ public abstract class Boss {
         return "You have made me angry.";
     }
 
+    public String getPhase3Line() {
+        return "FINAL OVERDRIVE! UNHANDLED EXCEPTION!";
+    }
+
     public String getDefeatLine() {
         return "Impossible...";
     }
@@ -140,7 +161,15 @@ public abstract class Boss {
         return PhaseStyle.ENRAGED;
     }
 
+    public PhaseStyle getPhase3Style() {
+        return PhaseStyle.OVERDRIVE;
+    }
+
     public PhaseStyle getStyle(Phase phase) {
-        return phase == Phase.NORMAL ? getPhase1Style() : getPhase2Style();
+        return switch (phase) {
+            case NORMAL -> getPhase1Style();
+            case ENRAGED -> getPhase2Style();
+            case OVERDRIVE -> getPhase3Style();
+        };
     }
 }

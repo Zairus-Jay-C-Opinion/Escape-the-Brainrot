@@ -462,16 +462,21 @@ public class BattleState extends GameState {
             vhs.glitch(40, 0.8f);
             bossView.glitchBurst();
 
-            String phase2Sprite = boss.getPhase2SpritePath();
+            String nextSprite = (boss.getCurrentPhase() == Phase.OVERDRIVE && boss.getPhase3SpritePath() != null)
+                    ? boss.getPhase3SpritePath()
+                    : boss.getPhase2SpritePath();
 
-            if (phase2Sprite != null){
-                bossView.setSprite(phase2Sprite);
+            if (nextSprite != null) {
+                bossView.setSprite(nextSprite);
             }
 
             bossView.setEnraged(style.accent());
             slam.start(boss.getCurrentPhase().getLabel(), style.accent());
             backdrop.setStyle(style);
-            dialogue.show(boss.getName(), boss.getPhase2Line());
+            String phaseLine = boss.getCurrentPhase() == Phase.OVERDRIVE
+                    ? boss.getPhase3Line()
+                    : boss.getPhase2Line();
+            dialogue.show(boss.getName(), phaseLine);
             shakeTicksLeft = SHAKE_TICKS;
         }
         if (stageTicks >= PHASE_TOTAL_TICKS) {
