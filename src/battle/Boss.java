@@ -90,23 +90,23 @@ public abstract class Boss {
     public abstract void onDefeat();
 
     /** Whether this boss enters Phase 2 at low HP. Early bosses stay in Phase 1. */
-    public boolean hasPhase2(){
+    public boolean hasPhase2() {
         return false;
     }
 
     /** HP at or below which Phase 2 begins (equal to the number of Phase 2 questions). */
-    public int getPhase2Hp(){
+    public int getPhase2Hp() {
         return maxHp / 2;
     }
 
-    /** Whether this boss enters Phase 3 at critical HP. */
+    /** Whether this boss enters Phase 3 (Overdrive / Final phase). */
     public boolean hasPhase3() {
         return false;
     }
 
     /** HP at or below which Phase 3 begins (equal to the number of Phase 3 questions). */
     public int getPhase3Hp() {
-        return maxHp / 3;
+        return 1;
     }
 
     /** The OOP concept this boss tests, shown on the code terminal. */

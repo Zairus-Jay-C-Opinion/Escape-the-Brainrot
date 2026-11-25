@@ -1,10 +1,12 @@
 package engine;
 
+import battle.BombardiroCrocodilo;
 import battle.Boss;
 import battle.Boss67;
 import battle.ChimpanziniBananini;
 import battle.LiriliLarila;
 import battle.TralaleroTralala;
+import battle.TungTungTungSahur;
 import engine.InputHandler.Action;
 import exception.AssetLoadException;
 import exception.LevelLoadException;
@@ -73,10 +75,10 @@ public class WorldMapState extends GameState {
 
         // Screen rectangles aligned to the 6 boss TVs in world_map.jpeg (768x576).
         channels.add(new Channel("CHIMPANZINI BANANINI", new ChimpanziniBananini(), new Rectangle(164, 116, 96, 80), -1, false));
-        channels.add(new Channel("BOMBARDIRO CROCODILO", null, new Rectangle(514, 104, 130, 96), 0, false));
-        channels.add(new Channel("TRALALERO TRALALA", new TralaleroTralala(), new Rectangle(16, 336, 112, 88), 0, false));
+        channels.add(new Channel("BOMBARDIRO CROCODILO", new BombardiroCrocodilo(), new Rectangle(514, 104, 130, 96), 0, false));
+        channels.add(new Channel("TRALALERO TRALALA", new TralaleroTralala(), new Rectangle(16, 336, 112, 88), 1, false));
         channels.add(new Channel("LIRILI LARILA", new LiriliLarila(), new Rectangle(180, 344, 104, 82), 2, false));
-        channels.add(new Channel("TUNG TUNG TUNG SAHUR", null, new Rectangle(508, 324, 132, 102), 3, false));
+        channels.add(new Channel("TUNG TUNG TUNG SAHUR", new TungTungTungSahur(), new Rectangle(508, 324, 132, 102), 3, false));
         channels.add(new Channel("67", new Boss67(), new Rectangle(298, 38, 170, 134), 4, true));
 
         for (Channel c : channels) {
