@@ -1,0 +1,162 @@
+ID: LIRI-01
+TYPE: FILL_BLANK
+DIFFICULTY: EASY
+PROMPT:
+Which keyword declares a class that cannot be instantiated directly?
+CODE:
+________ class DesertBeast {
+    abstract void stomp();
+}
+ANSWER: abstract
+EXPLANATION: The abstract keyword marks a class that cannot be instantiated with 'new'.
+HINT: Look at the modifier already used on void stomp() on line 2.
+---
+ID: LIRI-02
+TYPE: FILL_BLANK
+DIFFICULTY: EASY
+PROMPT:
+Which keyword lets a class adopt an interface contract?
+CODE:
+interface Tickable {
+    void tick();
+}
+class CactusClock __________ Tickable {
+    public void tick() { }
+}
+ANSWER: implements
+EXPLANATION: A class uses 'implements' to fulfill an interface contract.
+HINT: Classes use 'extends' for a superclass, and a different keyword for an interface.
+---
+ID: LIRI-03
+TYPE: SPOT_BUG
+DIFFICULTY: EASY
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: abstract class Plant {
+2:     abstract void grow();
+3: }
+4: class Test {
+5:     public static void main(String[] args) {
+6:         Plant p = new Plant();
+7:     }
+8: }
+ANSWER: 6
+EXPLANATION: Line 6 tries to instantiate the abstract class Plant directly with 'new Plant()'.
+HINT: Remember what you are never allowed to do directly with an abstract class.
+---
+ID: LIRI-04
+TYPE: ARRANGE
+DIFFICULTY: EASY
+PROMPT:
+Arrange the lines to declare an abstract Shape class with an abstract area() method:
+CODE:
+1:     abstract double area();
+2: abstract class Shape {
+3: }
+ANSWER: 2,1,3
+HINT: Open the abstract class first, put the abstract method inside, then close the brace.
+---
+ID: LIRI-05
+TYPE: SPOT_BUG
+DIFFICULTY: MEDIUM
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: abstract class Bird {
+2:     abstract void fly() {
+3:         System.out.println("up");
+4:     }
+5: }
+ANSWER: 2
+EXPLANATION: Line 2 gives a method body '{ ... }' to an abstract method; abstract methods must end with a semicolon.
+HINT: Can an abstract method have curly braces and a body?
+---
+ID: LIRI-06
+TYPE: ARRANGE
+DIFFICULTY: MEDIUM
+PROMPT:
+Arrange the lines so Sandal Elephant properly implements the Walker interface:
+CODE:
+1:     public void walk() { System.out.println("stomp"); }
+2: class Elephant implements Walker {
+3: }
+4:     @Override
+ANSWER: 2,4,1,3
+HINT: Class header first, then @Override right above the public walk() method, then closing brace.
+---
+ID: LIRI-07
+TYPE: FILL_BLANK
+DIFFICULTY: MEDIUM
+PROMPT:
+Every method declared in an interface without a body is implicitly public and ________.
+CODE:
+interface SoundMaker {
+    // Implicitly public and ________:
+    void chime();
+}
+ANSWER: abstract
+EXPLANATION: Interface methods without bodies are implicitly public and abstract.
+HINT: It is the same keyword used on incomplete methods in an abstract class.
+---
+ID: LIRI-08
+TYPE: SPOT_BUG
+DIFFICULTY: HARD
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: abstract class Weapon {
+2:     abstract void strike();
+3: }
+4: class Thorn extends Weapon {
+5:     void poke() { }
+6: }
+ANSWER: 4
+EXPLANATION: Line 4 declares concrete class Thorn extending Weapon without implementing abstract method strike().
+HINT: A non-abstract subclass must override every abstract method from its parent.
+---
+ID: LIRI-09
+TYPE: SPOT_BUG
+DIFFICULTY: HARD
+PROMPT:
+Which line number contains a compilation error?
+CODE:
+1: interface Audible {
+2:     void ring();
+3: }
+4: class Bell implements Audible {
+5:     void ring() { }
+6: }
+ANSWER: 5
+EXPLANATION: Line 5 omits 'public' on ring(); interface methods are public, so the implementation must also be public.
+HINT: What access modifier is required when implementing a method from an interface?
+---
+ID: LIRI-10
+TYPE: ARRANGE
+DIFFICULTY: HARD
+PROMPT:
+Arrange the lines to define an abstract class with a concrete helper and an abstract method:
+CODE:
+1:     void tick() { System.out.println("tick"); }
+2:     abstract void chime();
+3: abstract class Clock {
+4: }
+5:     int hour = 12;
+ANSWER: 3,5,1,2,4
+HINT: Class header first, then field(s), then concrete method, then abstract method, then closing brace.
+---
+ID: LIRI-11
+TYPE: FILL_BLANK
+DIFFICULTY: HARD
+PROMPT:
+Fill in the missing keyword so AbstractMirage can extend Mirage without implementing vanish() yet:
+CODE:
+abstract class Mirage {
+    abstract void vanish();
+}
+________ class AbstractMirage extends Mirage {
+    int shimmer = 5;
+}
+ANSWER: abstract
+EXPLANATION: A subclass that does not implement all inherited abstract methods must itself be declared abstract.
+HINT: If a subclass leaves an abstract method unimplemented, what modifier must the subclass have?

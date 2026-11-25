@@ -62,10 +62,13 @@ public abstract class Boss {
     }
 
     private void checkPhaseTransition() {
-        if (!isDefeated() && hasPhase3() && currentPhase == Phase.ENRAGED && currentHp <= getPhase3Hp()) {
-            currentPhase = Phase.OVERDRIVE;
+        if (isDefeated()) {
+            return;
+        }
+        if (hasPhase3() && currentPhase != Phase.FINAL && currentHp <= getPhase3Hp()) {
+            currentPhase = Phase.FINAL;
             onPhaseChange(currentPhase);
-        } else if (!isDefeated() && hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
+        } else if (hasPhase2() && currentPhase == Phase.NORMAL && currentHp <= getPhase2Hp()) {
             currentPhase = Phase.ENRAGED;
             onPhaseChange(currentPhase);
         }
@@ -101,7 +104,7 @@ public abstract class Boss {
         return false;
     }
 
-    /** HP at or below which Phase 3 begins. */
+    /** HP at or below which Phase 3 begins (equal to the number of Phase 3 questions). */
     public int getPhase3Hp() {
         return 1;
     }
@@ -121,6 +124,19 @@ public abstract class Boss {
     }
 
     public String getPhase3SpritePath() {
+        return null;
+    }
+
+    public String getPhaseSpritePath(Phase phase) {
+        return switch (phase) {
+            case NORMAL -> getSpritePath();
+            case ENRAGED -> getPhase2SpritePath();
+            case FINAL -> getPhase3SpritePath();
+        };
+    }
+
+    /** Optional challenge file used exclusively for the final HP point (e.g., 67's climax question). */
+    public String getClimaxChallengeFile() {
         return null;
     }
 
@@ -146,7 +162,15 @@ public abstract class Boss {
     }
 
     public String getPhase3Line() {
-        return "FINAL OVERDRIVE! UNHANDLED EXCEPTION!";
+        return "This is my final form!";
+    }
+
+    public String getPhaseLine(Phase phase) {
+        return switch (phase) {
+            case NORMAL -> getIntroLine();
+            case ENRAGED -> getPhase2Line();
+            case FINAL -> getPhase3Line();
+        };
     }
 
     public String getDefeatLine() {
@@ -162,14 +186,14 @@ public abstract class Boss {
     }
 
     public PhaseStyle getPhase3Style() {
-        return PhaseStyle.OVERDRIVE;
+        return PhaseStyle.FINAL;
     }
 
     public PhaseStyle getStyle(Phase phase) {
         return switch (phase) {
             case NORMAL -> getPhase1Style();
             case ENRAGED -> getPhase2Style();
-            case OVERDRIVE -> getPhase3Style();
+            case FINAL -> getPhase3Style();
         };
     }
 }

@@ -8,9 +8,10 @@ cd /d "%~dp0"
 if not exist bin mkdir bin
 if exist bin\sources.txt del bin\sources.txt
 
-rem List every .java file (quoted, with forward slashes) so javac gets them all in one go.
+rem List every .java file as a relative path (quoted, with forward slashes) so non-ASCII parent folders never break javac.
 for /f "delims=" %%f in ('dir /s /b src\*.java') do (
     set "p=%%f"
+    set "p=!p:*\src\=src\!"
     set "p=!p:\=/!"
     echo "!p!">> bin\sources.txt
 )

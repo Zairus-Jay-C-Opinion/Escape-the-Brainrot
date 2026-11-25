@@ -6,7 +6,7 @@ import engine.Config;
 public enum Phase {
     NORMAL(1, Modifier.NONE),
     ENRAGED(2, Modifier.OVERCLOCK),
-    OVERDRIVE(3, Modifier.OVERCLOCK);
+    FINAL(3, Modifier.OVERDRIVE);
 
     private final int number;
     private final Modifier modifier;
@@ -30,6 +30,10 @@ public enum Phase {
 
     /** How much more a wrong answer costs in this phase. */
     public double getStrainMultiplier() {
-        return this != NORMAL ? Config.getDouble("phase2.wrongMultiplier") : 1.0;
+        return switch (this) {
+            case NORMAL -> 1.0;
+            case ENRAGED -> Config.getDouble("phase2.wrongMultiplier");
+            case FINAL -> Config.getDouble("phase3.wrongMultiplier");
+        };
     }
 }

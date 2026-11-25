@@ -70,7 +70,9 @@ public class BattleState extends GameState {
     private final Boss boss;
     private final BrainrotGauge gauge;
     private final ChallengeDeck deck;
+    private final Challenge climaxChallenge;
     private final BattleTimer timer;
+    private final Random random = new Random();
 
     private final ScreenEffect vhs = new ScreenEffect(GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, 0.5f, false);
     private final BattleBackdrop backdrop;
@@ -90,6 +92,7 @@ public class BattleState extends GameState {
 
     private Stage stage = Stage.INTRO;
     private Challenge current;
+    private int[] choiceOrder;
     private volatile String typed = "";
     private int tick;
     private int stageTicks;
@@ -112,6 +115,9 @@ public class BattleState extends GameState {
         }
 
         this.deck = new ChallengeDeck(loadChallenges(boss));
+        String climaxFile = boss.getClimaxChallengeFile();
+        List<Challenge> climaxList = climaxFile != null ? ChallengeLoader.loadChallenges(climaxFile) : List.of();
+        this.climaxChallenge = climaxList.isEmpty() ? null : climaxList.get(0);
         this.timer = new BattleTimer(Difficulty.EASY.getStrainIntervalSeconds());
         timer.setPaused(true);
         this.hud = new Hud(gauge, levelBosses);
@@ -165,8 +171,13 @@ public class BattleState extends GameState {
     // ---------------------------------------------------------------- questions
 
     private void loadNextQuestion() {
-        current = deck.draw(boss.getCurrentPhase());
+        if (climaxChallenge != null && boss.getCurrentHp() <= Config.getInt("battle.damagePerCorrect")) {
+            current = climaxChallenge;
+        } else {
+            current = deck.draw(boss.getCurrentPhase());
+        }
         typed = "";
+        choiceOrder = null;
         // Anything said about the previous question must not sit under the new one.
         dialogue.show("");
 
@@ -176,12 +187,34 @@ public class BattleState extends GameState {
         codeBox.setTitle(current.getTypeLabel() + " | " + current.getDifficulty() + " | " + boss.getConcept());
         codeBox.setContent(current.getPrompt(), current.getCodeSnippet());
         if (choices) {
-            choiceBox.setChoices(current.getChoices());
+            List<String> rawChoices = current.getChoices();
+            choiceOrder = buildChoiceOrder(rawChoices.size(), boss.getCurrentPhase().getModifier().shufflesChoices());
+            List<String> displayed = new ArrayList<>(rawChoices.size());
+            for (int idx : choiceOrder) {
+                displayed.add(rawChoices.get(idx));
+            }
+            choiceBox.setChoices(displayed);
             choiceBox.setBounds(TERMINAL_X + 8, codeBox.getAnswerAreaTop() + 4, TERMINAL_WIDTH - 16);
         }
 
         timer.reset();
         timer.setIntervalSeconds(strainIntervalSeconds());
+    }
+
+    private int[] buildChoiceOrder(int size, boolean shuffle) {
+        int[] order = new int[size];
+        for (int i = 0; i < size; i++) {
+            order[i] = i;
+        }
+        if (shuffle) {
+            for (int i = size - 1; i > 0; i--) {
+                int j = random.nextInt(i + 1);
+                int tmp = order[i];
+                order[i] = order[j];
+                order[j] = tmp;
+            }
+        }
+        return order;
     }
 
     private int strainIntervalSeconds() {
@@ -431,7 +464,9 @@ public class BattleState extends GameState {
     }
 
     private void submitChoice(int index) {
-        if (!submit(String.valueOf(index + 1))) {
+        int originalIndex = (choiceOrder != null && index >= 0 && index < choiceOrder.length)
+                ? choiceOrder[index] : index;
+        if (!submit(String.valueOf(originalIndex + 1))) {
             choiceBox.eliminate(index);
         }
     }
@@ -462,21 +497,16 @@ public class BattleState extends GameState {
             vhs.glitch(40, 0.8f);
             bossView.glitchBurst();
 
-            String nextSprite = (boss.getCurrentPhase() == Phase.OVERDRIVE && boss.getPhase3SpritePath() != null)
-                    ? boss.getPhase3SpritePath()
-                    : boss.getPhase2SpritePath();
+            String phaseSprite = boss.getPhaseSpritePath(boss.getCurrentPhase());
 
-            if (nextSprite != null) {
-                bossView.setSprite(nextSprite);
+            if (phaseSprite != null){
+                bossView.setSprite(phaseSprite);
             }
 
             bossView.setEnraged(style.accent());
             slam.start(boss.getCurrentPhase().getLabel(), style.accent());
             backdrop.setStyle(style);
-            String phaseLine = boss.getCurrentPhase() == Phase.OVERDRIVE
-                    ? boss.getPhase3Line()
-                    : boss.getPhase2Line();
-            dialogue.show(boss.getName(), phaseLine);
+            dialogue.show(boss.getName(), boss.getPhaseLine(boss.getCurrentPhase()));
             shakeTicksLeft = SHAKE_TICKS;
         }
         if (stageTicks >= PHASE_TOTAL_TICKS) {

@@ -1,0 +1,9 @@
+TYPE=PREDICT_OUTPUT
+DIFFICULTY=HARD
+CODE=abstract class Mind {\n    private boolean free = false;\n    void reclaim() { free = true; }\n    abstract String state();\n}\nclass You extends Mind {\n    String state() { return free ? "AWAKE" : "67"; }\n    public static void main(String[] a) {\n        Mind m = new You(); m.reclaim();\n        System.out.println(m.state());\n    }\n}
+CHOICE=67
+CHOICE=AWAKE
+CHOICE=Compile error
+CHOICE=null
+ANSWER=3
+HINT=Look closely at 'free' in Mind: can subclass You read a private field directly?
