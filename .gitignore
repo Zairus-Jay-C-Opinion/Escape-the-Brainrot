@@ -5,3 +5,7 @@ out/
 .DS_Store
 .vscode/*
 !.vscode/settings.json
+art/
+docs/mockups/
+docs/*.pdf
+.claude/

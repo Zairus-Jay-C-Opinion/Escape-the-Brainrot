@@ -402,8 +402,13 @@ public class BattleState extends GameState {
     private void updateQuestion(List<int[]> keys, boolean clicked, MouseInput mouse) {
         int mouseX = mouse.getX();
         int mouseY = mouse.getY();
+        int wheel = mouse.getWheelRotation();
         boolean mouseMoved = mouseX != lastMouseX || mouseY != lastMouseY;
 
+        if (wheel != 0){
+            codeBox.scroll(wheel * 18);
+        }
+        
         switch (current.getAnswerInput()) {
             case CHOICE -> updateChoiceInput(keys, clicked, mouseMoved, mouseX, mouseY);
             case LINE -> {
