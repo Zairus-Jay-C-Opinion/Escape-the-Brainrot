@@ -1,8 +1,13 @@
 package engine;
 
 import engine.InputHandler.Action;
+import entity.Player;
 import exception.AssetLoadException;
 import exception.LevelLoadException;
+import exception.SaveDataException;
+import systems.BrainrotGauge;
+import systems.RebirthManager;
+import systems.SaveManager;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -17,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.LookupOp;
 import java.awt.image.ShortLookupTable;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
 /** Animated horror title screen: a dark room lit by a phone, lightning, rain, VHS effects and the main menu. Owner: Zrs. */
@@ -101,6 +107,10 @@ public class TitleState extends GameState {
     private boolean fading;
     private int fadeTicks;
     private String errorMessage;       // shown if the map fails to load
+
+    private final SaveManager saveManager = new SaveManager();
+    private RebirthManager rebirthManager;
+    private String statusMessage = "";
 
     public TitleState(StateManager manager) {
         super(manager);
@@ -232,7 +242,7 @@ public class TitleState extends GameState {
 
         MouseInput mouse = manager.getMouse();
         int hovered = buttonAt(mouse.getX(), mouse.getY());
-        boolean usable = hovered >= 0 && menu[hovered].enabled;
+        boolean usable = hovered >= 0 && isMenuEnabled(hovered);
         // Only a real mouse move steals the highlight, so the keyboard still works while the pointer rests on a button.
         boolean moved = mouse.getX() != lastMouseX || mouse.getY() != lastMouseY;
         lastMouseX = mouse.getX();
@@ -245,12 +255,70 @@ public class TitleState extends GameState {
         }
     }
 
+    private boolean isMenuEnabled(int index) {
+        if (menu[index] == MenuItem.LOAD_GAME) {
+            return saveManager.hasSaveFile();
+        }
+        return menu[index].enabled;
+    }
+
     private void activateSelected() {
         switch (menu[selected]) {
             case NEW_GAME -> fading = true;
+            case LOAD_GAME -> handleLoadGame();
             case EXIT -> System.exit(0);
             default -> { }
         }
+    }
+
+    public void handleLoadGame() {
+        handleLoadGame(manager.getGauge(), null);
+    }
+
+    public void handleLoadGame(BrainrotGauge gauge, Player player) {
+        if (!saveManager.hasSaveFile()) {
+            statusMessage = "No save file found.";
+            errorMessage = statusMessage;
+            return;
+        }
+
+        try {
+            Properties data = saveManager.loadCheckpoint();
+
+            int tileX = Integer.parseInt(data.getProperty("player.tileX"));
+            int tileY = Integer.parseInt(data.getProperty("player.tileY"));
+            int strain = Integer.parseInt(data.getProperty("gauge.strain"));
+            int rot = Integer.parseInt(data.getProperty("gauge.rot"));
+            int rebirths = Integer.parseInt(data.getProperty("rebirth.count"));
+
+            if (gauge != null) {
+                gauge.setStrain(strain);
+                gauge.setRot(rot);
+            }
+            if (player != null) {
+                player.setTilePosition(tileX, tileY);
+            }
+            this.rebirthManager = new RebirthManager(rebirths);
+
+            statusMessage = "";
+            errorMessage = null;
+            startOverworld();
+        } catch (SaveDataException e) {
+            statusMessage = "Load failed: " + e.getMessage();
+            errorMessage = statusMessage;
+        }
+    }
+
+    public SaveManager getSaveManager() {
+        return saveManager;
+    }
+
+    public RebirthManager getRebirthManager() {
+        return rebirthManager;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
     }
 
     private int buttonX(int index) {
@@ -274,7 +342,7 @@ public class TitleState extends GameState {
     private void moveSelection(int step) {
         do {
             selected = (selected + step + menu.length) % menu.length;
-        } while (!menu[selected].enabled);
+        } while (!isMenuEnabled(selected));
     }
 
     private void startOverworld() {
@@ -364,7 +432,7 @@ public class TitleState extends GameState {
             Color top;
             Color bottom;
             Color text;
-            if (!menu[i].enabled) {
+            if (!isMenuEnabled(i)) {
                 top = new Color(70, 70, 76);
                 bottom = new Color(48, 48, 54);
                 text = new Color(120, 120, 128);

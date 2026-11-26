@@ -23,6 +23,7 @@ import ui.Hud;
 import ui.SlamBanner;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -89,6 +90,11 @@ public class BattleState extends GameState {
     // Key events arrive on the Swing thread; update() drains them on the game thread so the rules never race.
     private final Queue<int[]> keyQueue = new ConcurrentLinkedQueue<>();
     private final KeyEventDispatcher keyDispatcher;
+
+    private static final String[] PAUSE_OPTIONS = {"Resume", "Settings", "Quit to Map"};
+    private boolean paused;
+    private int pauseSelection = 0;
+    private String pauseStatusMessage = "";
 
     private Stage stage = Stage.INTRO;
     private Challenge current;
@@ -165,6 +171,48 @@ public class BattleState extends GameState {
         }
         if (returnTo != null) {
             manager.setState(returnTo);
+        }
+    }
+
+    public void setPaused(boolean paused) {
+        this.paused = paused;
+        if (timer != null) {
+            timer.setPaused(paused);
+        }
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    private void handlePauseKeys(List<int[]> keys) {
+        for (int[] k : keys) {
+            handlePauseKey(k[0]);
+        }
+    }
+
+    private void handlePauseKey(int keyCode) {
+        if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W) {
+            pauseSelection = (pauseSelection - 1 + PAUSE_OPTIONS.length) % PAUSE_OPTIONS.length;
+        } else if (keyCode == KeyEvent.VK_DOWN || keyCode == KeyEvent.VK_S) {
+            pauseSelection = (pauseSelection + 1) % PAUSE_OPTIONS.length;
+        } else if (keyCode == KeyEvent.VK_ENTER) {
+            activatePauseOption();
+        }
+    }
+
+    private void activatePauseOption() {
+        switch (pauseSelection) {
+            case 0 -> {
+                pauseStatusMessage = "";
+                setPaused(false);
+            }
+            case 1 -> pauseStatusMessage = "Settings: Audio/Config toggle ready.";
+            case 2 -> {
+                setPaused(false);
+                leave();
+            }
+            default -> { }
         }
     }
 
@@ -400,6 +448,17 @@ public class BattleState extends GameState {
     }
 
     private void updateQuestion(List<int[]> keys, boolean clicked, MouseInput mouse) {
+        for (int[] k : keys) {
+            if (k[0] == KeyEvent.VK_ESCAPE) {
+                setPaused(!paused);
+                return;
+            }
+        }
+        if (paused) {
+            handlePauseKeys(keys);
+            return;
+        }
+
         int mouseX = mouse.getX();
         int mouseY = mouse.getY();
         int wheel = mouse.getWheelRotation();
@@ -574,15 +633,52 @@ public class BattleState extends GameState {
         }
         
         if (current != null && stage != Stage.INTRO && stage != Stage.PHASE_CHANGE) {
-            codeBox.draw(g);
-            if (current.getAnswerInput() == AnswerInput.CHOICE) {
-                choiceBox.draw(g);
+            if (paused) {
+                renderPauseOverlay(g);
             } else {
-                codeBox.drawTypedInput(g, current.getInputHint(), typed, (tick / 30) % 2 == 0);
+                codeBox.draw(g);
+                if (current.getAnswerInput() == AnswerInput.CHOICE) {
+                    choiceBox.draw(g);
+                } else {
+                    codeBox.drawTypedInput(g, current.getInputHint(), typed, (tick / 30) % 2 == 0);
+                }
             }
         }
         header.draw(g, boss.getName(), boss.getCurrentPhase().getNumber(), timer.getElapsedSeconds(),
                 timer.getIntervalProgress(), backdrop.getAccent());
         g.setTransform(saved);
+    }
+
+    private void renderPauseOverlay(Graphics2D g) {
+        g.setColor(new Color(22, 24, 34));
+        g.fillRect(50, 105, 700, 365);
+        g.setColor(new Color(220, 90, 90));
+        g.drawRect(50, 105, 700, 365);
+
+        g.setFont(new Font("Monospaced", Font.BOLD, 28));
+        g.setColor(Color.WHITE);
+        g.drawString("PAUSED", 345, 155);
+
+        g.setFont(new Font("Monospaced", Font.ITALIC, 15));
+        g.setColor(new Color(255, 180, 90));
+        g.drawString("The code hides when you look away.", 240, 190);
+
+        g.setFont(new Font("Monospaced", Font.BOLD, 17));
+        for (int i = 0; i < PAUSE_OPTIONS.length; i++) {
+            boolean selected = (i == pauseSelection);
+            g.setColor(selected ? new Color(255, 215, 0) : Color.LIGHT_GRAY);
+            String label = (selected ? "> " : "  ") + PAUSE_OPTIONS[i];
+            g.drawString(label, 330, 245 + i * 38);
+        }
+
+        if (!pauseStatusMessage.isEmpty()) {
+            g.setFont(new Font("Monospaced", Font.PLAIN, 13));
+            g.setColor(new Color(140, 220, 255));
+            g.drawString(pauseStatusMessage, 250, 375);
+        }
+
+        g.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        g.setColor(new Color(150, 160, 180));
+        g.drawString("UP/DOWN to select, ENTER to confirm, ESC to resume", 215, 430);
     }
 }
