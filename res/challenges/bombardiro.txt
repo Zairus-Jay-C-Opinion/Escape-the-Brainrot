@@ -59,13 +59,14 @@ ID: INH-04
 TYPE: ARRANGE
 DIFFICULTY: MEDIUM
 PROMPT:
-Enter the line numbers in the correct sequence (e.g. 1,2,3,4) to call a parent constructor from a subclass.
+Enter the line numbers in the correct sequence (e.g. 1,2,3,4,5) to call a parent constructor from a subclass.
 CODE:
 1:         super();
 2: class Fighter extends Airplane {
 3:     Fighter() {
 4:     }
-ANSWER: 2,3,1,4
+5: }
+ANSWER: 2,3,1,4,5
 HINT: The super() call must be the very first statement inside the constructor's braces.
 ---
 ID: INH-05
