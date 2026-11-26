@@ -46,6 +46,14 @@ public class BrainrotGauge {
         strain = Math.max(0, strain - amount);
     }
 
+    public void setStrain(double s) {
+        this.strain = Math.max(0, Math.min(maxStrain, s));
+    }
+
+    public void setRot(double r) {
+        this.rot = Math.max(0, r);
+    }
+
     /** Called when a boss is defeated: clears that boss's Rot. */
     public void clearRot(int amount) {
         if (amount <= 0) {
