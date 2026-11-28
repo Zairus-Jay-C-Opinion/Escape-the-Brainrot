@@ -60,6 +60,11 @@ public class OverworldState extends GameState {
     }
 
     @Override
+    public void onEnter() {
+        Sound.playBgm("/sounds/bgm_overworld.wav");
+    }
+
+    @Override
     public void update() {
         hud.update();
         markDefeatedBosses();
@@ -92,6 +97,7 @@ public class OverworldState extends GameState {
                 manager.setState(new BattleState(manager, this, boss, manager.getGauge(), hudBosses));
             }
         } else if (justArrived && tile == TileMap.PORTAL && worldMap != null) {
+            Sound.playSfx("/sounds/portal.wav");
             manager.setState(worldMap);
         }
     }

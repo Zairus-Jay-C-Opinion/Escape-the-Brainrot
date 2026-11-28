@@ -9,6 +9,7 @@ import engine.GamePanel;
 import engine.GameState;
 import engine.MouseInput;
 import engine.ScreenEffect;
+import engine.Sound;
 import engine.StateManager;
 import systems.BrainrotGauge;
 import ui.BattleBackdrop;
@@ -156,6 +157,12 @@ public class BattleState extends GameState {
         return all;
     }
 
+    @Override
+    public void onEnter() {
+        String bgm = (boss instanceof Boss67) ? "/sounds/bgm_boss67.wav" : "/sounds/bgm_battle.wav";
+        Sound.playBgm(bgm);
+    }
+
     public Boss getBoss() {
         return boss;
     }
@@ -202,12 +209,16 @@ public class BattleState extends GameState {
     }
 
     private void activatePauseOption() {
+        Sound.playSfx("/sounds/click.wav");
         switch (pauseSelection) {
             case 0 -> {
                 pauseStatusMessage = "";
                 setPaused(false);
             }
-            case 1 -> pauseStatusMessage = "Settings: Audio/Config toggle ready.";
+            case 1 -> {
+                boolean nowMuted = Sound.toggleMute();
+                pauseStatusMessage = nowMuted ? "Audio: MUTED" : "Audio: ON";
+            }
             case 2 -> {
                 setPaused(false);
                 leave();
@@ -289,6 +300,7 @@ public class BattleState extends GameState {
         boss.takeDamage(damage);
         gauge.reduceStrain(Config.getInt("battle.correctStrainReward"));
         bossView.hit();
+        Sound.playSfx("/sounds/hit.wav");
         floating.add("-" + damage, BOSS_AREA_X + BOSS_AREA_WIDTH / 2 + 40, BOSS_AREA_Y + 70, new Color(255, 235, 140));
 
         String note = noteFor(current);
@@ -320,6 +332,7 @@ public class BattleState extends GameState {
                 * boss.getCurrentPhase().getStrainMultiplier());
         gauge.addStrain(cost);
         hud.flashWarning();
+        Sound.playSfx("/sounds/wrong.wav");
         floating.add("+" + cost + " STRAIN", hud.getStrainLabelX(), hud.getStrainLabelY(), new Color(255, 90, 100));
         shakeTicksLeft = SHAKE_TICKS;
         typed = "";
@@ -343,6 +356,8 @@ public class BattleState extends GameState {
             stage = Stage.FRIED;
             stageTicks = 0;
             timer.setPaused(true);
+            Sound.stopBgm();
+            Sound.playSfx("/sounds/fried.wav");
             dialogue.show("SYSTEM", "Strain overload. The feed swallowed your mind.\nReturning to the overworld...");
         }
     }
@@ -491,8 +506,10 @@ public class BattleState extends GameState {
             }
             if (code == KeyEvent.VK_UP) {
                 choiceBox.move(-1);
+                Sound.playSfx("/sounds/click.wav");
             } else if (code == KeyEvent.VK_DOWN) {
                 choiceBox.move(1);
+                Sound.playSfx("/sounds/click.wav");
             } else if (code == KeyEvent.VK_ENTER) {
                 submitChoice(choiceBox.getSelected());
                 return;
@@ -555,6 +572,7 @@ public class BattleState extends GameState {
             PhaseStyle style = boss.getStyle(boss.getCurrentPhase());
             vhs.glitch(40, 0.8f);
             bossView.glitchBurst();
+            Sound.playSfx("/sounds/phase_change.wav");
 
             String phaseSprite = boss.getPhaseSpritePath(boss.getCurrentPhase());
 
