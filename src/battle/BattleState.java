@@ -21,10 +21,12 @@ import ui.FloatingTexts;
 import ui.FriedView;
 import ui.Hud;
 import ui.SlamBanner;
+import ui.UiTheme;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
@@ -47,16 +49,16 @@ public class BattleState extends GameState {
         INTRO, QUESTION, REVIEW, PHASE_CHANGE, DEFEAT, END_WAIT, FRIED
     }
 
-    private static final int TERMINAL_X = 20;
+    private static final int TERMINAL_X = 16;
     private static final int TERMINAL_Y = 92;
-    private static final int TERMINAL_WIDTH = 424;
+    private static final int TERMINAL_WIDTH = 362;
     private static final int TERMINAL_HEIGHT = 330;
     private static final int CHOICE_ROW_HEIGHT = 26;
     private static final int TYPED_AREA_HEIGHT = 58;
 
-    private static final int BOSS_AREA_X = 456;
+    private static final int BOSS_AREA_X = 390;
     private static final int BOSS_AREA_Y = 84;
-    private static final int BOSS_AREA_WIDTH = 300;
+    private static final int BOSS_AREA_WIDTH = 362;
     private static final int BOSS_AREA_HEIGHT = 338;
 
     private static final int PHASE_FREEZE_TICKS = 30;
@@ -97,6 +99,7 @@ public class BattleState extends GameState {
     private final KeyEventDispatcher keyDispatcher;
 
     private static final String[] PAUSE_OPTIONS = { "Resume", "Settings", "Quit to Map" };
+    private static final Rectangle PAUSE_BTN = new Rectangle(604, 8, 34, 34);
     private boolean paused;
     private int pauseSelection = 0;
     private String pauseStatusMessage = "";
@@ -474,6 +477,14 @@ public class BattleState extends GameState {
     }
 
     private void updateQuestion(List<int[]> keys, boolean clicked, MouseInput mouse) {
+        int mouseX = mouse.getX();
+        int mouseY = mouse.getY();
+        boolean mouseMoved = mouseX != lastMouseX || mouseY != lastMouseY;
+
+        if (clicked && PAUSE_BTN.contains(mouseX, mouseY)) {
+            setPaused(!paused);
+            return;
+        }
         for (int[] k : keys) {
             if (k[0] == KeyEvent.VK_ESCAPE) {
                 setPaused(!paused);
@@ -482,13 +493,22 @@ public class BattleState extends GameState {
         }
         if (paused) {
             handlePauseKeys(keys);
+            for (int i = 0; i < PAUSE_OPTIONS.length; i++) {
+                Rectangle optRect = new Rectangle(260, 250 + i * 38, 248, 30);
+                if (optRect.contains(mouseX, mouseY)) {
+                    if (mouseMoved) {
+                        pauseSelection = i;
+                    }
+                    if (clicked) {
+                        pauseSelection = i;
+                        activatePauseOption();
+                    }
+                }
+            }
             return;
         }
 
-        int mouseX = mouse.getX();
-        int mouseY = mouse.getY();
         int wheel = mouse.getWheelRotation();
-        boolean mouseMoved = mouseX != lastMouseX || mouseY != lastMouseY;
 
         if (wheel != 0) {
             codeBox.scroll(wheel * 18);
@@ -636,9 +656,15 @@ public class BattleState extends GameState {
             drawFight(scene);
         }
         hud.draw(scene);
+        if (stage == Stage.QUESTION) {
+            drawPauseButton(scene);
+        }
         floating.draw(scene);
         slam.draw(scene);
         dialogue.draw(scene);
+        if (paused) {
+            renderPauseOverlay(scene);
+        }
         vhs.present(g);
     }
 
@@ -660,16 +686,12 @@ public class BattleState extends GameState {
             bossView.draw(g, BOSS_AREA_X, BOSS_AREA_Y, BOSS_AREA_WIDTH, BOSS_AREA_HEIGHT);
         }
 
-        if (current != null && stage != Stage.INTRO && stage != Stage.PHASE_CHANGE) {
-            if (paused) {
-                renderPauseOverlay(g);
+        if (current != null && stage != Stage.INTRO && stage != Stage.PHASE_CHANGE && !paused) {
+            codeBox.draw(g);
+            if (current.getAnswerInput() == AnswerInput.CHOICE) {
+                choiceBox.draw(g);
             } else {
-                codeBox.draw(g);
-                if (current.getAnswerInput() == AnswerInput.CHOICE) {
-                    choiceBox.draw(g);
-                } else {
-                    codeBox.drawTypedInput(g, current.getInputHint(), typed, (tick / 30) % 2 == 0);
-                }
+                codeBox.drawTypedInput(g, current.getInputHint(), typed, (tick / 30) % 2 == 0);
             }
         }
         header.draw(g, boss.getName(), boss.getCurrentPhase().getNumber(), timer.getElapsedSeconds(),
@@ -677,36 +699,54 @@ public class BattleState extends GameState {
         g.setTransform(saved);
     }
 
+    private void drawPauseButton(Graphics2D g) {
+        UiTheme.panel(g, PAUSE_BTN.x, PAUSE_BTN.y, PAUSE_BTN.width, PAUSE_BTN.height,
+                new Color(14, 18, 30, 210), new Color(110, 130, 160));
+        g.setColor(UiTheme.CREAM);
+        if (paused) {
+            int[] xs = {PAUSE_BTN.x + 12, PAUSE_BTN.x + 12, PAUSE_BTN.x + 24};
+            int[] ys = {PAUSE_BTN.y + 9, PAUSE_BTN.y + 25, PAUSE_BTN.y + 17};
+            g.fillPolygon(xs, ys, 3);
+        } else {
+            g.fillRect(PAUSE_BTN.x + 11, PAUSE_BTN.y + 9, 4, 16);
+            g.fillRect(PAUSE_BTN.x + 19, PAUSE_BTN.y + 9, 4, 16);
+        }
+    }
+
     private void renderPauseOverlay(Graphics2D g) {
+        g.setColor(new Color(6, 8, 14, 195));
+        g.fillRect(0, 0, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
+
+        int bx = 184;
+        int by = 138;
+        int bw = 400;
+        int bh = 300;
         g.setColor(new Color(22, 24, 34));
-        g.fillRect(50, 105, 700, 365);
+        g.fillRect(bx, by, bw, bh);
         g.setColor(new Color(220, 90, 90));
-        g.drawRect(50, 105, 700, 365);
+        g.drawRect(bx, by, bw, bh);
 
-        g.setFont(new Font("Monospaced", Font.BOLD, 28));
-        g.setColor(Color.WHITE);
-        g.drawString("PAUSED", 345, 155);
+        int cx = GamePanel.SCREEN_WIDTH / 2;
+        g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 28));
+        UiTheme.centeredText(g, "PAUSED", cx, by + 48, Color.WHITE);
 
-        g.setFont(new Font("Monospaced", Font.ITALIC, 15));
-        g.setColor(new Color(255, 180, 90));
-        g.drawString("The code hides when you look away.", 240, 190);
+        g.setFont(new Font(Font.MONOSPACED, Font.ITALIC, 14));
+        UiTheme.centeredText(g, "The code hides when you look away.", cx, by + 78, new Color(255, 180, 90));
 
-        g.setFont(new Font("Monospaced", Font.BOLD, 17));
+        g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 17));
         for (int i = 0; i < PAUSE_OPTIONS.length; i++) {
             boolean selected = (i == pauseSelection);
-            g.setColor(selected ? new Color(255, 215, 0) : Color.LIGHT_GRAY);
-            String label = (selected ? "> " : "  ") + PAUSE_OPTIONS[i];
-            g.drawString(label, 330, 245 + i * 38);
+            Color optColor = selected ? new Color(255, 215, 0) : Color.LIGHT_GRAY;
+            String label = (selected ? "> " : "") + PAUSE_OPTIONS[i];
+            UiTheme.centeredText(g, label, cx, 270 + i * 38, optColor);
         }
 
         if (!pauseStatusMessage.isEmpty()) {
-            g.setFont(new Font("Monospaced", Font.PLAIN, 13));
-            g.setColor(new Color(140, 220, 255));
-            g.drawString(pauseStatusMessage, 250, 375);
+            g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
+            UiTheme.centeredText(g, pauseStatusMessage, cx, by + 236, new Color(140, 220, 255));
         }
 
-        g.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        g.setColor(new Color(150, 160, 180));
-        g.drawString("UP/DOWN to select, ENTER to confirm, ESC to resume", 215, 430);
+        g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        UiTheme.centeredText(g, "UP/DOWN to select, ENTER to confirm, ESC to resume", cx, by + 276, new Color(150, 160, 180));
     }
 }

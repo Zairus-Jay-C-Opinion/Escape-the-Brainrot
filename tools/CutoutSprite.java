@@ -9,9 +9,9 @@ import java.util.Arrays;
  * Usage: java tools/CutoutSprite.java <input> <output>
  */
 public class CutoutSprite {
-    static final int BG_TOLERANCE = 90;   // max color distance from the background to count as background
-    static final int FRINGE_PASSES = 3;   // how many pixels deep to peel pink edge pixels
-    static final int DESPILL_DEPTH = 2;   // how many pixels in from the edge to remove leftover tint
+    static final int BG_TOLERANCE = 115;  // max color distance from the background to count as background
+    static final int FRINGE_PASSES = 5;   // how many pixels deep to peel pink edge pixels
+    static final int DESPILL_DEPTH = 3;   // how many pixels in from the edge to remove leftover tint
     static final int PADDING = 4;
 
     public static void main(String[] args) throws Exception {
@@ -38,6 +38,13 @@ public class CutoutSprite {
             if (x < w - 1) seed(queue, bg, px, bgColor, x + 1, y, w);
             if (y > 0) seed(queue, bg, px, bgColor, x, y - 1, w);
             if (y < h - 1) seed(queue, bg, px, bgColor, x, y + 1, w);
+        }
+
+        // Remove interior magenta pockets (e.g. trapped between legs) that the outer flood-fill could not reach.
+        for (int i = 0; i < px.length; i++) {
+            if (!bg[i] && isPink(px[i]) && distance(px[i], bgColor) < 75) {
+                bg[i] = true;
+            }
         }
 
         // Peel pink fringe: pixels touching the background that are still pink-tinted.

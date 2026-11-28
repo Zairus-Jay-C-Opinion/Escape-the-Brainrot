@@ -35,15 +35,20 @@ public class OverworldState extends GameState {
     private static final Font HINT_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
     public OverworldState(StateManager manager) throws LevelLoadException {
-        this(manager, null, "/maps/test-map.csv", null, List.of());
+        this(manager, null, "/maps/test-map.csv", TileMap.Theme.PAVEMENT, null, List.of());
     }
 
     public OverworldState(StateManager manager, GameState worldMap, String mapPath,
                           Boss levelBoss, List<Boss> allBosses) throws LevelLoadException {
+        this(manager, worldMap, mapPath, TileMap.Theme.PAVEMENT, levelBoss, allBosses);
+    }
+
+    public OverworldState(StateManager manager, GameState worldMap, String mapPath, TileMap.Theme theme,
+                          Boss levelBoss, List<Boss> allBosses) throws LevelLoadException {
         super(manager);
         this.worldMap = worldMap;
         this.levelBoss = levelBoss;
-        map = new TileMap(mapPath);
+        map = new TileMap(mapPath, theme);
         player = new Player(1, 1); // start tile (column 1, row 1)
         // Created up front so the HUD can show a Rot segment for every boss on the map.
         for (int row = 0; row < map.getHeight(); row++) {
