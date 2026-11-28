@@ -36,12 +36,16 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * The boss fight. This class owns the rules (questions, timer, Strain, damage, phases, win and fried);
- * every pixel is drawn by the ui classes. Everything boss-specific comes from the Boss. Owner: Andrew.
+ * The boss fight. This class owns the rules (questions, timer, Strain, damage,
+ * phases, win and fried);
+ * every pixel is drawn by the ui classes. Everything boss-specific comes from
+ * the Boss. Owner: Andrew.
  */
 public class BattleState extends GameState {
 
-    private enum Stage { INTRO, QUESTION, REVIEW, PHASE_CHANGE, DEFEAT, END_WAIT, FRIED }
+    private enum Stage {
+        INTRO, QUESTION, REVIEW, PHASE_CHANGE, DEFEAT, END_WAIT, FRIED
+    }
 
     private static final int TERMINAL_X = 20;
     private static final int TERMINAL_Y = 92;
@@ -87,11 +91,12 @@ public class BattleState extends GameState {
     private final SlamBanner slam = new SlamBanner();
     private final FriedView friedView = new FriedView();
 
-    // Key events arrive on the Swing thread; update() drains them on the game thread so the rules never race.
+    // Key events arrive on the Swing thread; update() drains them on the game
+    // thread so the rules never race.
     private final Queue<int[]> keyQueue = new ConcurrentLinkedQueue<>();
     private final KeyEventDispatcher keyDispatcher;
 
-    private static final String[] PAUSE_OPTIONS = {"Resume", "Settings", "Quit to Map"};
+    private static final String[] PAUSE_OPTIONS = { "Resume", "Settings", "Quit to Map" };
     private boolean paused;
     private int pauseSelection = 0;
     private String pauseStatusMessage = "";
@@ -111,7 +116,8 @@ public class BattleState extends GameState {
     }
 
     /** levelBosses are the bosses the HUD shows as locked Rot segments. */
-    public BattleState(StateManager manager, GameState returnTo, Boss boss, BrainrotGauge gauge, List<Boss> levelBosses) {
+    public BattleState(StateManager manager, GameState returnTo, Boss boss, BrainrotGauge gauge,
+            List<Boss> levelBosses) {
         super(manager);
         this.returnTo = returnTo;
         this.boss = boss;
@@ -141,7 +147,7 @@ public class BattleState extends GameState {
         this.keyDispatcher = e -> {
             // Cmd or Ctrl means a shortcut such as fullscreen, not an answer character.
             if (e.getID() == KeyEvent.KEY_PRESSED && !e.isMetaDown() && !e.isControlDown()) {
-                keyQueue.add(new int[] {e.getKeyCode(), e.getKeyChar()});
+                keyQueue.add(new int[] { e.getKeyCode(), e.getKeyChar() });
             }
             return false;
         };
@@ -167,7 +173,16 @@ public class BattleState extends GameState {
     private void leave() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(keyDispatcher);
         if (stage == Stage.FRIED) {
-            gauge.resetStrain();
+            if (manager.getRebirthManager().triggerRebirth(gauge)) {
+                if (returnTo != null) {
+                    manager.setState(returnTo);
+                }
+            } else {
+                gauge.resetStrain();
+                manager.setRebirthManager(new systems.RebirthManager());
+                manager.setState(new engine.TitleState(manager));
+            }
+            return;
         }
         if (returnTo != null) {
             manager.setState(returnTo);
@@ -212,7 +227,8 @@ public class BattleState extends GameState {
                 setPaused(false);
                 leave();
             }
-            default -> { }
+            default -> {
+            }
         }
     }
 
@@ -297,21 +313,24 @@ public class BattleState extends GameState {
         } else if (boss.getCurrentPhase() != before) {
             startPhaseChange();
         } else {
-            // The solved question stays on screen with its note until the player is ready for the next one.
+            // The solved question stays on screen with its note until the player is ready
+            // for the next one.
             dialogue.show(boss.getName(), boss.getHitLine() + note);
             stage = Stage.REVIEW;
             timer.setPaused(true);
         }
     }
 
-    // The explanation can give the answer away, which is fine here because the question is already solved.
+    // The explanation can give the answer away, which is fine here because the
+    // question is already solved.
     private static String noteFor(Challenge solved) {
         String explanation = solved.getExplanation();
         if (explanation == null || explanation.isBlank()) {
             return "";
         }
         String shortened = explanation.length() > MAX_NOTE_LENGTH
-                ? explanation.substring(0, MAX_NOTE_LENGTH - 3) + "..." : explanation;
+                ? explanation.substring(0, MAX_NOTE_LENGTH - 3) + "..."
+                : explanation;
         return "\nNote: " + shortened;
     }
 
@@ -323,7 +342,8 @@ public class BattleState extends GameState {
         floating.add("+" + cost + " STRAIN", hud.getStrainLabelX(), hud.getStrainLabelY(), new Color(255, 90, 100));
         shakeTicksLeft = SHAKE_TICKS;
         typed = "";
-        // The hint comes from getHint, never getExplanation, so the answer stays hidden.
+        // The hint comes from getHint, never getExplanation, so the answer stays
+        // hidden.
         dialogue.show(boss.getName(), boss.getWrongLine() + "\nHint: " + current.getHint());
         checkFried();
     }
@@ -336,14 +356,20 @@ public class BattleState extends GameState {
         checkFried();
     }
 
-    // ---------------------------------------------------------------- stage changes
+    // ---------------------------------------------------------------- stage
+    // changes
 
     private void checkFried() {
         if (gauge.isFried()) {
             stage = Stage.FRIED;
             stageTicks = 0;
             timer.setPaused(true);
-            dialogue.show("SYSTEM", "Strain overload. The feed swallowed your mind.\nReturning to the overworld...");
+            int nextRebirth = manager.getRebirthManager().getRebirthCount() + 1;
+            String msg = manager.getRebirthManager().canRebirth()
+                    ? "Strain overload. Rebirth " + nextRebirth + " of " +
+                            Config.getMaxRebirths() + ".\nReturning to the overworld..."
+                    : "Strain overload. No rebirths left!\nReturning to the title screen...";
+            dialogue.show("SYSTEM", msg);
         }
     }
 
@@ -461,7 +487,12 @@ public class BattleState extends GameState {
 
         int mouseX = mouse.getX();
         int mouseY = mouse.getY();
+        int wheel = mouse.getWheelRotation();
         boolean mouseMoved = mouseX != lastMouseX || mouseY != lastMouseY;
+
+        if (wheel != 0) {
+            codeBox.scroll(wheel * 18);
+        }
 
         switch (current.getAnswerInput()) {
             case CHOICE -> updateChoiceInput(keys, clicked, mouseMoved, mouseX, mouseY);
@@ -524,7 +555,8 @@ public class BattleState extends GameState {
 
     private void submitChoice(int index) {
         int originalIndex = (choiceOrder != null && index >= 0 && index < choiceOrder.length)
-                ? choiceOrder[index] : index;
+                ? choiceOrder[index]
+                : index;
         if (!submit(String.valueOf(originalIndex + 1))) {
             choiceBox.eliminate(index);
         }
@@ -558,7 +590,7 @@ public class BattleState extends GameState {
 
             String phaseSprite = boss.getPhaseSpritePath(boss.getCurrentPhase());
 
-            if (phaseSprite != null){
+            if (phaseSprite != null) {
                 bossView.setSprite(phaseSprite);
             }
 
@@ -584,7 +616,8 @@ public class BattleState extends GameState {
 
     private void updateFried(List<int[]> keys, boolean clicked) {
         stageTicks++;
-        // Bursts of heavy tearing with calmer frames between, so the title stays readable.
+        // Bursts of heavy tearing with calmer frames between, so the title stays
+        // readable.
         boolean burst = stageTicks % FRIED_BURST_PERIOD_TICKS < FRIED_BURST_TICKS;
         vhs.glitch(2, burst ? FRIED_GLITCH_BURST : FRIED_GLITCH_IDLE);
         if (stageTicks >= FRIED_MIN_TICKS && continuePressed(keys, clicked, "Press ENTER to continue")) {
@@ -612,7 +645,8 @@ public class BattleState extends GameState {
     private void drawFight(Graphics2D g) {
         AffineTransform saved = g.getTransform();
         if (shakeTicksLeft > 0) {
-            // Seeded by tick so the shake looks the same however often the screen repaints inside one update.
+            // Seeded by tick so the shake looks the same however often the screen repaints
+            // inside one update.
             Random shake = new Random(tick * 17L);
             double strength = SHAKE_PIXELS * (double) shakeTicksLeft / SHAKE_TICKS;
             g.translate((shake.nextDouble() * 2 - 1) * strength, (shake.nextDouble() * 2 - 1) * strength);
@@ -620,13 +654,12 @@ public class BattleState extends GameState {
 
         backdrop.draw(g);
 
-        if (stage == Stage.PHASE_CHANGE){
+        if (stage == Stage.PHASE_CHANGE) {
             bossView.draw(g, 164, 76, 440, 356);
-        }
-        else{
+        } else {
             bossView.draw(g, BOSS_AREA_X, BOSS_AREA_Y, BOSS_AREA_WIDTH, BOSS_AREA_HEIGHT);
         }
-        
+
         if (current != null && stage != Stage.INTRO && stage != Stage.PHASE_CHANGE) {
             if (paused) {
                 renderPauseOverlay(g);

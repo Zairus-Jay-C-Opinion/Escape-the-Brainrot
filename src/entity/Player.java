@@ -26,6 +26,11 @@ public class Player extends Entity {
         return moving;
     }
 
+    public void setTilePosition(int tileX, int tileY){
+        placeAtTile(tileX, tileY);
+        moving = false;
+    }
+
     /** Starts a one-tile step if the player is idle and the target tile isn't a wall. Returns true if it started. */
     public boolean tryMove(int dx, int dy, TileMap map) {
         if (moving || map.isSolid(getTileX() + dx, getTileY() + dy)) {

@@ -299,6 +299,7 @@ public class TitleState extends GameState {
                 player.setTilePosition(tileX, tileY);
             }
             this.rebirthManager = new RebirthManager(rebirths);
+            manager.setRebirthManager(this.rebirthManager);
 
             statusMessage = "";
             errorMessage = null;

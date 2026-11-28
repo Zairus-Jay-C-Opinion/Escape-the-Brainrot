@@ -2,6 +2,7 @@ package engine;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 
 /**
  * Mouse position in game pixels plus a one-update "clicked" flag, the mouse twin of InputHandler.
@@ -13,6 +14,7 @@ public class MouseInput extends MouseAdapter {
             GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT, GamePanel.SCREEN_WIDTH, GamePanel.SCREEN_HEIGHT);
     private int x = -1; // -1 until the mouse has been over the window
     private int y = -1;
+    private int wheelRotation;
     private boolean clicked;
 
     /** GamePanel calls this every frame so conversion always matches how the picture was just drawn. */
@@ -35,6 +37,11 @@ public class MouseInput extends MouseAdapter {
 
     public synchronized void endFrame() {
         clicked = false;
+        wheelRotation = 0;
+    }
+
+    public synchronized int getWheelRotation(){
+        return wheelRotation; 
     }
 
     private synchronized void track(MouseEvent e) {
@@ -58,5 +65,10 @@ public class MouseInput extends MouseAdapter {
         if (e.getButton() == MouseEvent.BUTTON1) {
             clicked = true;
         }
+    }
+
+    @Override 
+    public synchronized void mouseWheelMoved(MouseWheelEvent e){
+        wheelRotation += e.getWheelRotation();
     }
 }

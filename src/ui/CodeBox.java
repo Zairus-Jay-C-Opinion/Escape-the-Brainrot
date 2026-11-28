@@ -38,6 +38,7 @@ public class CodeBox {
     private int height;
     private int answerAreaHeight;
     private int hoverLine = -1;
+    private int scrollY;
     private int wrapWidth;
 
     // A throwaway 1x1 image gives us a Graphics2D to measure text before the first real draw.
@@ -79,8 +80,23 @@ public class CodeBox {
         this.hoverLine = lineNumber;
     }
 
+    private int maxScroll(){
+        int totalHeight = 0;
+        for (Row row : rows){
+            totalHeight += row.isCode ? CODE_LINE_HEIGHT : PROMPT_LINE_HEIGHT;
+        }
+        int visibleHeight = height - TITLE_BAR_HEIGHT - answerAreaHeight - 12;
+        return Math.max(0, totalHeight - visibleHeight);
+    }
+
+    public void scroll(int deltaPixels){
+        scrollY = Math.max(0, Math.min(maxScroll(), scrollY + deltaPixels));
+    }
+
     public void setContent(String prompt, String code) {
         rows.clear();
+        scrollY = 0;
+
         for (String line : prompt.split("\n")) {
             for (String piece : wrap(line, PROMPT_METRICS, width - 2 * PADDING)) {
                 rows.add(new Row("", piece, 0, false));
@@ -111,6 +127,9 @@ public class CodeBox {
 
     /** The code line number under a game-pixel point, or -1. Uses the numbers the file gives its lines. */
     public int lineAt(int px, int py) {
+        if (py < y + TITLE_BAR_HEIGHT || py >= getAnswerAreaTop()){
+            return -1;
+        }
         int rowY = firstCodeRowTop();
         for (Row row : rows) {
             if (!row.isCode) {
@@ -134,7 +153,7 @@ public class CodeBox {
         // Clip so a very long snippet can never spill into the answer controls.
         java.awt.Shape oldClip = g.getClip();
         g.setClip(x + 1, y + TITLE_BAR_HEIGHT, width - 2, height - TITLE_BAR_HEIGHT - answerAreaHeight);
-        int rowY = y + TITLE_BAR_HEIGHT + 6;
+        int rowY = y + TITLE_BAR_HEIGHT + 6 - scrollY;
         for (Row row : rows) {
             if (row.isCode) {
                 drawCodeRow(g, row, rowY);
@@ -147,6 +166,18 @@ public class CodeBox {
             }
         }
         g.setClip(oldClip);
+
+        int max = maxScroll();
+        if (max > 0) {
+            int trackY = y + TITLE_BAR_HEIGHT + 4;
+            int trackH = height - TITLE_BAR_HEIGHT - answerAreaHeight - 8;
+            int thumbH = Math.max(20, trackH * trackH / (trackH + max));
+            int thumbY = trackY + (trackH - thumbH) * scrollY / max;
+            g.setColor(new Color(40, 100, 104, 90));
+            g.fillRect(x + width - 7, trackY, 3, trackH);
+            g.setColor(new Color(120, 220, 220, 180));
+            g.fillRect(x + width - 7, thumbY, 3, thumbH);
+        }
 
         g.setColor(new Color(70, 200, 200, 90));
         g.drawLine(x + 8, getAnswerAreaTop() - 2, x + width - 9, getAnswerAreaTop() - 2);
@@ -177,7 +208,7 @@ public class CodeBox {
     }
 
     private int firstCodeRowTop() {
-        int rowY = y + TITLE_BAR_HEIGHT + 6;
+        int rowY = y + TITLE_BAR_HEIGHT + 6 - scrollY;
         for (Row row : rows) {
             if (row.isCode) {
                 return rowY;

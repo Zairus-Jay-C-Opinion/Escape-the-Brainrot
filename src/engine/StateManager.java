@@ -1,7 +1,7 @@
 package engine;
 
 import java.awt.Graphics2D;
-
+import systems.RebirthManager;
 import systems.BrainrotGauge;
 
 /** Holds the current screen and switches between screens. Owner: Zrs. */
@@ -12,12 +12,22 @@ public class StateManager {
     private volatile GameState current; // volatile: set by the game thread, read by the painting thread
     private BrainrotGauge gauge = new BrainrotGauge();
 
+    private RebirthManager rebirthManager = new RebirthManager();
+
     public StateManager(InputHandler input, MouseInput mouse) {
         this.input = input;
         this.mouse = mouse;
     }
 
-    public BrainrotGauge getGauge(){
+    public RebirthManager getRebirthManager() {
+        return rebirthManager;
+    }
+
+    public void setRebirthManager(RebirthManager rebirthManagaer) {
+        this.rebirthManager = rebirthManager;
+    }
+
+    public BrainrotGauge getGauge() {
         return gauge;
     }
 
