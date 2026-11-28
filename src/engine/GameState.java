@@ -12,6 +12,9 @@ public abstract class GameState {
         this.manager = manager;
     }
 
+    /** Called whenever this screen becomes the active state in StateManager. */
+    public void onEnter() { }
+
     /** Called 60 times per second. Game logic only, no drawing. */
     public abstract void update();
 

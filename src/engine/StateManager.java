@@ -31,6 +31,9 @@ public class StateManager {
 
     public void setState(GameState state) {
         current = state;
+        if (state != null) {
+            state.onEnter();
+        }
     }
 
     public void update() {
