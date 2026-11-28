@@ -117,6 +117,11 @@ public class TitleState extends GameState {
         rainSound.loop();
     }
 
+    @Override
+    public void onEnter() {
+        Sound.playBgm("/sounds/bgm_title.wav");
+    }
+
     private static BufferedImage loadFitted(String path) {
         try {
             return fitScale(AssetManager.getImage(path));
@@ -263,6 +268,7 @@ public class TitleState extends GameState {
     }
 
     private void activateSelected() {
+        Sound.playSfx("/sounds/click.wav");
         switch (menu[selected]) {
             case NEW_GAME -> fading = true;
             case LOAD_GAME -> handleLoadGame();
@@ -340,9 +346,13 @@ public class TitleState extends GameState {
     }
 
     private void moveSelection(int step) {
+        int before = selected;
         do {
             selected = (selected + step + menu.length) % menu.length;
         } while (!isMenuEnabled(selected));
+        if (selected != before) {
+            Sound.playSfx("/sounds/click.wav");
+        }
     }
 
     private void startOverworld() {

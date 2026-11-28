@@ -126,6 +126,11 @@ public class WorldMapState extends GameState {
     }
 
     @Override
+    public void onEnter() {
+        Sound.playBgm("/sounds/bgm_tv_wall.wav");
+    }
+
+    @Override
     public void update() {
         tick++;
         hud.update();
@@ -136,9 +141,11 @@ public class WorldMapState extends GameState {
         if (input.wasPressed(Action.LEFT) || input.wasPressed(Action.UP)) {
             selected = (selected - 1 + channels.size()) % channels.size();
             statusText = "Select a channel.";
+            Sound.playSfx("/sounds/click.wav");
         } else if (input.wasPressed(Action.RIGHT) || input.wasPressed(Action.DOWN)) {
             selected = (selected + 1) % channels.size();
             statusText = "Select a channel.";
+            Sound.playSfx("/sounds/click.wav");
         }
 
         int mx = mouse.getX();
@@ -168,9 +175,12 @@ public class WorldMapState extends GameState {
         Channel c = channels.get(selected);
         if (c.boss != null && c.boss.isDefeated()) {
             statusText = c.name + " is already CLEARED.";
+            Sound.playSfx("/sounds/wrong.wav");
         } else if (!isUnlocked(c)) {
             statusText = "NO SIGNAL — Channel locked.";
+            Sound.playSfx("/sounds/wrong.wav");
         } else {
+            Sound.playSfx("/sounds/click.wav");
             try {
                 manager.setState(new OverworldState(manager, this, "/maps/test-map.csv", c.boss, bosses));
             } catch (LevelLoadException e) {

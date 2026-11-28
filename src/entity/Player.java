@@ -26,6 +26,13 @@ public class Player extends Entity {
         return moving;
     }
 
+    /** Teleports the player to a tile (used when loading a saved checkpoint). */
+    public void setTilePosition(int tileX, int tileY) {
+        setTile(tileX, tileY);
+        setPixel(tileX * GamePanel.SCALED_TILE_SIZE, tileY * GamePanel.SCALED_TILE_SIZE);
+        moving = false;
+    }
+
     /** Starts a one-tile step if the player is idle and the target tile isn't a wall. Returns true if it started. */
     public boolean tryMove(int dx, int dy, TileMap map) {
         if (moving || map.isSolid(getTileX() + dx, getTileY() + dy)) {
