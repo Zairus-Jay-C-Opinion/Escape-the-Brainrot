@@ -7,12 +7,12 @@ import java.awt.Graphics2D;
 /** Top-center strip of the battle: boss name and phase, HP bar that eases, and the question timer. Owner: Zrs. */
 public class BossHeader {
 
-    private static final Font NAME_FONT = new Font(Font.MONOSPACED, Font.BOLD, 20);
-    private static final int CENTER_X = 450;
-    private static final int MAX_NAME_WIDTH = 340;
-    private static final int BAR_X = 345;
+    private static final Font NAME_FONT = new Font(Font.MONOSPACED, Font.BOLD, 15);
+    private static final int CENTER_X = 384;
+    private static final int MAX_NAME_WIDTH = 300;
+    private static final int BAR_X = 304;
     private static final int BAR_Y = 34;
-    private static final int BAR_WIDTH = 210;
+    private static final int BAR_WIDTH = 160;
     private static final int BAR_HEIGHT = 12;
     private static final double EASE = 0.12;
 

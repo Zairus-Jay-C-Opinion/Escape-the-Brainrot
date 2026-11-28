@@ -12,6 +12,7 @@ import exception.AssetLoadException;
 import exception.LevelLoadException;
 import ui.Hud;
 import ui.UiTheme;
+import world.TileMap;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -31,15 +32,20 @@ public class WorldMapState extends GameState {
     private static final class Channel {
         final String name;
         final Boss boss;
+        final String mapPath;
+        final TileMap.Theme theme;
         final Rectangle screen;
         final int requiresIndex;
         final boolean isFinal;
         final BufferedImage sprite;
         final BufferedImage silhouette;
 
-        Channel(String name, Boss boss, Rectangle screen, int requiresIndex, boolean isFinal) {
+        Channel(String name, Boss boss, String mapPath, TileMap.Theme theme,
+                Rectangle screen, int requiresIndex, boolean isFinal) {
             this.name = name;
             this.boss = boss;
+            this.mapPath = mapPath;
+            this.theme = theme;
             this.screen = screen;
             this.requiresIndex = requiresIndex;
             this.isFinal = isFinal;
@@ -74,12 +80,18 @@ public class WorldMapState extends GameState {
         this.background = loadSprite("/sprites/ui/world_map.jpeg");
 
         // Screen rectangles aligned to the 6 boss TVs in world_map.jpeg (768x576).
-        channels.add(new Channel("CHIMPANZINI BANANINI", new ChimpanziniBananini(), new Rectangle(164, 116, 96, 80), -1, false));
-        channels.add(new Channel("BOMBARDIRO CROCODILO", new BombardiroCrocodilo(), new Rectangle(514, 104, 130, 96), 0, false));
-        channels.add(new Channel("TRALALERO TRALALA", new TralaleroTralala(), new Rectangle(16, 336, 112, 88), 1, false));
-        channels.add(new Channel("LIRILI LARILA", new LiriliLarila(), new Rectangle(180, 344, 104, 82), 2, false));
-        channels.add(new Channel("TUNG TUNG TUNG SAHUR", new TungTungTungSahur(), new Rectangle(508, 324, 132, 102), 3, false));
-        channels.add(new Channel("67", new Boss67(), new Rectangle(298, 38, 170, 134), 4, true));
+        channels.add(new Channel("CHIMPANZINI BANANINI", new ChimpanziniBananini(),
+                "/maps/map_chimpanzini.csv", TileMap.Theme.PAVEMENT, new Rectangle(164, 116, 96, 80), -1, false));
+        channels.add(new Channel("BOMBARDIRO CROCODILO", new BombardiroCrocodilo(),
+                "/maps/map_bombardiro.csv", TileMap.Theme.GRASS, new Rectangle(514, 104, 130, 96), 0, false));
+        channels.add(new Channel("TRALALERO TRALALA", new TralaleroTralala(),
+                "/maps/map_tralalero.csv", TileMap.Theme.WATER, new Rectangle(16, 336, 112, 88), 1, false));
+        channels.add(new Channel("LIRILI LARILA", new LiriliLarila(),
+                "/maps/map_lirili.csv", TileMap.Theme.LIBRARY, new Rectangle(180, 344, 104, 82), 2, false));
+        channels.add(new Channel("TUNG TUNG TUNG SAHUR", new TungTungTungSahur(),
+                "/maps/map_tung.csv", TileMap.Theme.CORRUPTED, new Rectangle(508, 324, 132, 102), 3, false));
+        channels.add(new Channel("67", new Boss67(),
+                "/maps/map_67.csv", TileMap.Theme.FINAL, new Rectangle(298, 38, 170, 134), 4, true));
 
         for (Channel c : channels) {
             if (c.boss != null) {
@@ -172,7 +184,7 @@ public class WorldMapState extends GameState {
             statusText = "NO SIGNAL — Channel locked.";
         } else {
             try {
-                manager.setState(new OverworldState(manager, this, "/maps/test-map.csv", c.boss, bosses));
+                manager.setState(new OverworldState(manager, this, c.mapPath, c.theme, c.boss, bosses));
             } catch (LevelLoadException e) {
                 statusText = "Failed to load level: " + e.getMessage();
             }

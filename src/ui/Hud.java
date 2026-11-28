@@ -22,8 +22,8 @@ public class Hud {
 
     private static final int GAUGE_X = 10;
     private static final int ICON_Y = 18;
-    private static final int BAR_X = 58;
-    private static final int BAR_WIDTH = 190;
+    private static final int BAR_X = 56;
+    private static final int BAR_WIDTH = 124;
     private static final int STRAIN_LABEL_Y = 22;
     private static final int STRAIN_BAR_Y = 27;
     private static final int STRAIN_BAR_HEIGHT = 16;
